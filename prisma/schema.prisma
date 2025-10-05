@@ -1,0 +1,226 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String     @id @default(cuid())
+  walletAddress     String     @unique
+  username          String?    @unique
+  email             String?
+  createdAt         DateTime   @default(now())
+  lastLoginAt       DateTime?
+  
+  // Preferences
+  notificationsEnabled Boolean @default(true)
+  emailNotifications   Boolean @default(false)
+  showOnLeaderboard    Boolean @default(false)
+  
+  // Relations
+  positions         Position[]
+  trades            Trade[]
+  notifications     Notification[]
+  
+  @@index([walletAddress])
+  @@index([createdAt])
+}
+
+model Position {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Pair details
+  longMarketIndex   Int
+  longMarketSymbol  String
+  shortMarketIndex  Int
+  shortMarketSymbol String
+  
+  // Position details
+  capitalUSDC       Float
+  leverage          Float
+  longWeight        Float     @default(0.5)
+  shortWeight       Float     @default(0.5)
+  
+  // Entry data
+  entryRatio        Float
+  entryTimestamp    DateTime  @default(now())
+  entryLongPrice    Float
+  entryShortPrice   Float
+  
+  // TP/SL
+  takeProfitRatio   Float?
+  takeProfitPercent Float?
+  stopLossRatio     Float?
+  stopLossPercent   Float?
+  
+  // Status
+  status            String    @default("OPEN") // OPEN, CLOSED, LIQUIDATED
+  closeTimestamp    DateTime?
+  closeRatio        Float?
+  closeLongPrice    Float?
+  closeShortPrice   Float?
+  
+  // PnL
+  realizedPnL       Float?
+  realizedPnLPercent Float?
+  fees              Float?
+  
+  // Drift position IDs
+  driftLongPositionId  String?
+  driftShortPositionId String?
+  
+  // Partial fill tracking
+  partialLeg        String?   // "LONG" or "SHORT" - which leg is unfilled
+  longFillPercent   Float?    // % filled for long leg (0-100)
+  shortFillPercent  Float?    // % filled for short leg (0-100)
+  
+  // Metadata
+  notes             String?
+  pair              String?
+  tags              String[]  @default([])
+  
+  @@index([userId, status])
+  @@index([status])
+  @@index([entryTimestamp])
+  @@index([realizedPnL])
+}
+
+model Trade {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  positionId  String
+  
+  // Trade details
+  action      String   // OPEN_LONG, OPEN_SHORT, CLOSE_LONG, CLOSE_SHORT
+  marketIndex Int
+  marketSymbol String
+  amount      Float
+  price       Float
+  fees        Float?
+  
+  // Transaction
+  signature   String   @unique
+  txHash      String   @unique
+
+  timestamp   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([positionId])
+  @@index([timestamp])
+}
+
+model MarketData {
+  id            String   @id @default(cuid())
+  marketIndex   Int      @unique
+  symbol        String   @unique
+  
+  // Current price data
+  price              Float
+  volume24h          Float
+  fundingRate        Float
+  openInterest       Float
+  priceChange24hr    Float
+  priceChangePercent Float
+  // Volatility
+  volatility30d      Float?
+  
+  // Last updated
+  updatedAt     DateTime @updatedAt
+  
+  @@index([symbol])
+  @@index([volume24h])
+}
+
+model TradingSignal {
+  id            String   @id @default(cuid())
+  
+  // Pair details
+  longToken     String
+  shortToken    String
+  pair          String   // "SOL/ETH"
+  
+  // Signal data
+  action        String   // "LONG_SHORT" or "SHORT_LONG"
+  entryType     String   // "MEAN_REVERSION" or "TRENDING"
+  
+  // Statistics
+  zScore        Float
+  correlation   Float
+  cointegrated  Boolean
+  halfLifeDays  Float?
+  
+  // Suggested position
+  longWeight    Float
+  shortWeight   Float
+  
+  // Confidence
+  confidence    Float    // 0-1
+  quality       String   // "HIGH", "MEDIUM", "LOW"
+  
+  // Explanation
+  reasoning     String   @db.Text
+  
+  // Metadata
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  expiresAt     DateTime?
+  status        String   @default("ACTIVE")
+  
+  // Performance tracking
+  timesUsed     Int      @default(0)
+  avgPnL        Float?
+  
+  @@index([pair, createdAt])
+  @@index([quality, status])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // TP_HIT, SL_HIT, NEW_SIGNAL, POSITION_OPENED
+  title     String
+  message   String   @db.Text
+  data      Json?
+  
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+model PlatformStats {
+  id              String   @id @default(cuid())
+  date            DateTime @unique
+  
+  totalUsers      Int
+  activeUsers     Int
+  totalPositions  Int
+  
+  totalVolume     Float
+  totalPnL        Float
+  totalFees       Float
+  
+  dailyVolume      Float 
+  dailyPnL         Float
+  dailyActiveUsers Float
+
+  createdAt       DateTime @default(now())
+  
+  @@index([date])
+}
