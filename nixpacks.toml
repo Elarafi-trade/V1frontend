@@ -2,7 +2,7 @@
 # Forces Node.js 20 (required for Solana/Drift packages)
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "npm-10", "openssl"]
+nixPkgs = ["nodejs_20", "openssl"]
 
 [phases.install]
 cmds = ["npm install"]
