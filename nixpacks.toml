@@ -1,8 +1,9 @@
 # Railway/Nixpacks Configuration
 # Forces Node.js 20 (required for Solana/Drift packages)
+# Includes Python and build tools for native modules (usb, etc.)
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "openssl"]
+nixPkgs = ["nodejs_20", "openssl", "python3", "gcc", "gnumake", "pkg-config", "libudev-zero"]
 
 [phases.install]
 cmds = ["npm install"]
