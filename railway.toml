@@ -1,9 +1,9 @@
 # Railway Configuration File
 # Defines how to build and run your services
+# Build is handled by nixpacks.toml
 
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && npm run build"
 
 [deploy]
 startCommand = "npm run start"
