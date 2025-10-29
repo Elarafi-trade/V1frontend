@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import LandingNav from "@/components/LandingNav";
 import PairChart, { SupportedToken } from "@/components/pair-chart";
 import AccountBalance from "@/components/AccountBalance";
@@ -1055,4 +1055,11 @@ function Trade() {
   );
 }
 
-export default Trade;
+// Wrap in Suspense for Next.js static generation
+export default function TradePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#080807] flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+      <Trade />
+    </Suspense>
+  );
+}
