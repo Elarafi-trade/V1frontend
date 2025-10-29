@@ -69,14 +69,14 @@ const stats = {
  */
 async function initialize() {
   try {
-    // Import ES modules (compiled to dist folder)
-    const priceCacheModule = await import('./dist/services/priceCache.js');
-    const redisPubSubModule = await import('./dist/services/redisPubSub.js');
-    const clientManagerModule = await import('./dist/lib/drift/clientManager.js');
+    // Import CommonJS modules (compiled to dist folder)
+    const priceCacheModule = require('./dist/services/priceCache.js');
+    const redisPubSubModule = require('./dist/services/redisPubSub.js');
+    const clientManagerModule = require('./dist/lib/drift/clientManager.js');
     
-    priceCache = priceCacheModule.priceCache || priceCacheModule.default?.priceCache;
-    redisPubSub = redisPubSubModule.redisPubSub || redisPubSubModule.default?.redisPubSub;
-    getReadOnlyDriftClient = clientManagerModule.getReadOnlyDriftClient || clientManagerModule.default?.getReadOnlyDriftClient;
+    priceCache = priceCacheModule.priceCache;
+    redisPubSub = redisPubSubModule.redisPubSub;
+    getReadOnlyDriftClient = clientManagerModule.getReadOnlyDriftClient;
     
     // Debug log
     if (!priceCache || !redisPubSub || !getReadOnlyDriftClient) {
