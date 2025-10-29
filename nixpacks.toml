@@ -3,7 +3,7 @@
 # Includes Python and build tools for native modules (usb, etc.)
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "openssl", "python3", "gcc", "gnumake", "pkg-config", "libudev-zero"]
+nixPkgs = ["nodejs_20", "openssl", "python3", "gcc", "gnumake", "pkg-config", "systemd"]
 
 [phases.install]
 cmds = ["npm install"]
