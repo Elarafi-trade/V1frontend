@@ -14,7 +14,8 @@ cmds = [
 [phases.build]
 cmds = [
   "npx prisma generate",
-  "npm run build"
+  "npm run build:next",
+  "npm run build:worker"
 ]
 
 [start]
