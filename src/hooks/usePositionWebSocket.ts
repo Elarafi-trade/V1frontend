@@ -61,8 +61,9 @@ export const usePositionWebSocket = (onUpdate: (update: PositionUpdate) => void)
     cleanup();
 
     try {
-      // Connect to our backend WebSocket (we'll create this endpoint)
-      const ws = new WebSocket(`ws://localhost:3001/positions?wallet=${wallet.publicKey.toString()}`);
+      // Connect to our backend WebSocket - use Railway URL in production, localhost in dev
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
+      const ws = new WebSocket(`${wsUrl}/positions?wallet=${wallet.publicKey.toString()}`);
       
       ws.onopen = () => {
         console.log('✅ WebSocket connected for position updates');
