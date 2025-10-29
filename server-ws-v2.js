@@ -69,10 +69,10 @@ const stats = {
  */
 async function initialize() {
   try {
-    // Import ES modules
-    const priceCacheModule = await import('./src/services/priceCache.ts');
-    const redisPubSubModule = await import('./src/services/redisPubSub.ts');
-    const clientManagerModule = await import('./src/lib/drift/clientManager.ts');
+    // Import ES modules (compiled to .js)
+    const priceCacheModule = await import('./src/services/priceCache.js');
+    const redisPubSubModule = await import('./src/services/redisPubSub.js');
+    const clientManagerModule = await import('./src/lib/drift/clientManager.js');
     
     priceCache = priceCacheModule.priceCache || priceCacheModule.default?.priceCache;
     redisPubSub = redisPubSubModule.redisPubSub || redisPubSubModule.default?.redisPubSub;
