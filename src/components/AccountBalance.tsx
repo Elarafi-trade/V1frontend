@@ -7,15 +7,9 @@ import { Wallet, TrendingUp, Lock } from 'lucide-react';
 export default function AccountBalance() {
   const { balance } = useDriftAccount();
 
-  // Show placeholder if no balance loaded yet
+  // Hide if no balance loaded yet
   if (!balance) {
-    return (
-      <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/40 border border-border">
-        <div className="text-sm text-foreground/60">
-          💰 Open Deposit/Withdraw to view balance
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const pnl = balance.equity - balance.totalCollateral;

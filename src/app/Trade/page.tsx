@@ -1,10 +1,12 @@
 "use client";
 
+import React from 'react';
 import LandingNav from "@/components/LandingNav";
 import PairChart, { SupportedToken } from "@/components/pair-chart";
 import AccountBalance from "@/components/AccountBalance";
 import OrderHistory from "@/components/OrderHistory";
 import { ArrowUpDown } from "lucide-react";
+import toast, { Toaster } from 'react-hot-toast';
 
 import { ChevronDown, Repeat, ChevronDownCircle } from "lucide-react";
 import { useEffect, useMemo, useState, useCallback } from "react";
@@ -14,6 +16,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { usePairTrading } from "@/hooks/usePairTrading";
 import { useDriftMarkets } from "@/hooks/useDriftMarkets";
 import { usePositionWebSocket } from "@/hooks/usePositionWebSocket";
+import { useAgentAnalysis } from "@/hooks/useAgentAnalysis";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const TOKEN_LOGO: Record<string, string> = {
@@ -48,6 +51,7 @@ function Trade() {
   const wallet = useWallet();
   const { openPairTrade, loading, error } = usePairTrading();
   const { availableTokens, loading: marketsLoading, error: marketsError } = useDriftMarkets();
+  const { analysis, loading: agentLoading, error: agentError, fetchAnalysis } = useAgentAnalysis();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -144,13 +148,25 @@ function Trade() {
     }
 
     if (!wallet.connected) {
-      alert('Please connect your wallet first');
+      toast.error('Please connect your wallet first', {
+        style: {
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #ef4444',
+        },
+      });
       return;
     }
 
     const capitalUSDC = parseFloat(amount);
     if (!capitalUSDC || capitalUSDC <= 0) {
-      alert('Please enter a valid amount');
+      toast.error('Please enter a valid amount', {
+        style: {
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #ef4444',
+        },
+      });
       return;
     }
 
@@ -166,10 +182,135 @@ function Trade() {
         stopLossPercent: stopLossPercent ? parseFloat(stopLossPercent) : undefined,
       });
 
-      alert(`Position opened successfully!\nPosition ID: ${result.positionId}\nEntry Ratio: ${result.entryRatio.toFixed(6)}`);
-    } catch (err) {
+      toast.success(`Position opened successfully! ${longToken}/${shortToken} • Entry: ${result.entryRatio.toFixed(6)}`, {
+        style: {
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #22c55e',
+        },
+        duration: 5000,
+      });
+    } catch (err: any) {
       console.error('Error opening position:', err);
-      alert(error || 'Failed to open position');
+      
+      const errorMessage = err?.message || error || 'Failed to open position';
+      
+      // Handle specific error cases with custom toast messages
+      
+      // 1. User rejected the transaction
+      if (errorMessage.includes('User rejected') || 
+          errorMessage.includes('user rejected') ||
+          errorMessage.includes('User cancelled') ||
+          errorMessage.includes('Transaction cancelled') ||
+          errorMessage.includes('4001')) {
+        toast.error('Transaction rejected by user', {
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #ef4444',
+          },
+          duration: 4000,
+        });
+        return;
+      }
+      
+      // 2. Order too small for specific token
+      if (errorMessage.includes('order too small')) {
+        // Extract token name and minimum from error
+        const tokenMatch = errorMessage.match(/(\w+) order too small/);
+        const minMatch = errorMessage.match(/Minimum: \$(\d+)/);
+        const yourOrderMatch = errorMessage.match(/Your order: \$(\d+\.?\d*)/);
+        const minCapitalMatch = errorMessage.match(/Increase capital to at least \$(\d+)/);
+        
+        const token = tokenMatch ? tokenMatch[1] : '';
+        const minAmount = minMatch ? minMatch[1] : '';
+        const yourOrder = yourOrderMatch ? yourOrderMatch[1] : '';
+        const minCapital = minCapitalMatch ? minCapitalMatch[1] : '';
+        
+        toast.error(
+          <div className="space-y-1">
+            <div className="font-semibold">{token} order too small!</div>
+            <div className="text-xs">Your order: ${yourOrder} • Minimum: ${minAmount}</div>
+            {minCapital && <div className="text-xs text-white">💡 Increase capital to at least ${minCapital}</div>}
+          </div>,
+          {
+            style: {
+              background: '#1a1a1a',
+              color: '#fff',
+              border: '1px solid #ef4444',
+            },
+            duration: 6000,
+          }
+        );
+        return;
+      }
+      
+      // 3. Insufficient balance / collateral
+      if (errorMessage.includes('Insufficient') || 
+          errorMessage.includes('insufficient') ||
+          errorMessage.includes('not enough')) {
+        toast.error('Insufficient balance. Please add more SOL to your wallet.', {
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #ef4444',
+          },
+          duration: 5000,
+        });
+        return;
+      }
+      
+      // 4. Transaction already in progress
+      if (errorMessage.includes('already in progress')) {
+        toast.error('Transaction already in progress. Please wait...', {
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #ef4444',
+          },
+          duration: 4000,
+        });
+        return;
+      }
+      
+      // 5. Markets not found
+      if (errorMessage.includes('Markets not found')) {
+        toast.error(`Market pair ${longToken}/${shortToken} not available`, {
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #ef4444',
+          },
+          duration: 5000,
+        });
+        return;
+      }
+      
+      // 6. Network/Connection errors
+      if (errorMessage.includes('network') || 
+          errorMessage.includes('Network') ||
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('failed to fetch')) {
+        toast.error('Network error. Please check your connection and try again.', {
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #ef4444',
+          },
+          duration: 5000,
+        });
+        return;
+      }
+      
+      // 7. Generic error fallback
+      toast.error(errorMessage.split('\n')[0] || 'Failed to open position', {
+        style: {
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #ef4444',
+        },
+        duration: 6000,
+      });
     }
   };
 
@@ -203,6 +344,14 @@ function Trade() {
       clearInterval(id);
     };
   }, [longToken, shortToken]);
+
+  // Auto-fetch agent analysis when pair changes
+  useEffect(() => {
+    if (longToken && shortToken) {
+      // Convert to PERP format (e.g., SOL-PERP, ETH-PERP)
+      fetchAnalysis(`${longToken}-PERP`, `${shortToken}-PERP`, 100);
+    }
+  }, [longToken, shortToken, fetchAnalysis]);
 
   // Fetch current position for chart markers (ONCE - WebSocket handles updates)
   useEffect(() => {
@@ -301,65 +450,50 @@ function Trade() {
     };
   }, [isPairsOpen, unorderedPairs]);
 
+  // Console logs for status (not shown in UI)
+  React.useEffect(() => {
+    if (!wallet.connected) {
+      console.log('🔌 Wallet not connected - Connect your wallet to load Drift Protocol markets');
+    } else if (marketsLoading) {
+      console.log('⏳ Loading real Drift Protocol markets from devnet...');
+    } else if (marketsError) {
+      console.error('⚠️ Error loading Drift markets:', marketsError);
+    } else if (availableTokens.length > 0) {
+      console.log(`✅ Connected to Drift Protocol Devnet • ${availableTokens.length} markets • 100% Real Data`);
+      console.log('No Fallbacks • No Mocks • No Simulations');
+    }
+  }, [wallet.connected, marketsLoading, marketsError, availableTokens.length]);
+
   return (
     <>
-      <LandingNav />
+      {/* Toast Container */}
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+          },
+        }}
+      />
       
-      {/* Account Balance & Drift Markets Status */}
-      <div className="pt-20">
-        {/* Account Balance Widget */}
+      {/* pear.garden layout - Exact styling */}
+      <div className="min-h-screen flex flex-col bg-[#080807]">
+        {/* Account Balance - Compact */}
         {wallet.connected && (
-          <div className="mx-auto max-w-7xl px-4 py-2">
-            <div className="flex items-center justify-between">
-              <AccountBalance />
-            </div>
+          <div className="w-full bg-[#0F110F] border-b border-[#1a1a1a] px-4 py-2">
+            <AccountBalance />
           </div>
         )}
         
-        {/* Drift Markets Status */}
-        <div>
-        {!wallet.connected && (
-          <div className="mx-auto max-w-7xl px-4 py-2">
-            <div className="rounded-lg bg-amber-900/20 border border-amber-500/30 px-4 py-2 text-sm text-amber-200">
-              🔌 Connect your wallet to load Drift Protocol markets
-            </div>
-          </div>
-        )}
-        
-        {marketsLoading && wallet.connected && (
-          <div className="mx-auto max-w-7xl px-4 py-2">
-            <div className="rounded-lg bg-purple-900/20 border border-purple-500/30 px-4 py-2 text-sm text-purple-200">
-              <span className="animate-pulse">⏳ Loading real Drift Protocol markets from devnet...</span>
-            </div>
-          </div>
-        )}
-        
-        {marketsError && wallet.connected && (
-          <div className="mx-auto max-w-7xl px-4 py-2">
-            <div className="rounded-lg bg-red-900/20 border border-red-500/30 px-4 py-2 text-sm text-red-200">
-              ⚠️ Error loading Drift markets: {marketsError}
-            </div>
-          </div>
-        )}
-        
-        {availableTokens.length > 0 && wallet.connected && (
-          <div className="mx-auto max-w-7xl px-4 py-2">
-            <div className="rounded-lg bg-green-900/20 border border-green-500/30 px-4 py-2 text-sm text-green-200 flex items-center justify-between">
-              <span>✅ Connected to Drift Protocol Devnet • {availableTokens.length} markets • 100% Real Data</span>
-              <span className="text-xs opacity-75">No Fallbacks • No Mocks • No Simulations</span>
-            </div>
-          </div>
-        )}
-        </div>
-      </div>
-      
-      <div className="min-h-screen pt-4 pb-12">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left controls */}
-            <div className="lg:col-span-1 space-y-4">
+        {/* Main Content - pear.garden spacing */}
+        <div className="flex-1 flex flex-col w-full">
+          <div className="flex-1 p-3 min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-3 h-full min-h-0 w-full">
+            {/* Left controls - pear.garden style */}
+            <div className="lg:col-span-1 space-y-3 overflow-y-auto scrollbar-hide">
               {/* Market order card */}
-              <div className="rounded-2xl border border-border/60 bg-background/30 backdrop-blur-xl p-4">
+              <div className="rounded-xl border border-[#1a1a1a] bg-[#0F110F] p-4">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold text-foreground/80">Market Order</div>
                   <span className="rounded-full bg-purple-700/40 text-purple-200 px-3 py-1 text-xs">Drift</span>
@@ -433,23 +567,6 @@ function Trade() {
     </button>
   </div>
 </div>
-
-                {/* Low liquidity warning */}
-                {(['ETH', 'AVAX', 'MATIC', 'FTM'].includes(longToken) || ['ETH', 'AVAX', 'MATIC', 'FTM'].includes(shortToken)) && (
-                  <div className="mt-4 rounded-xl border border-orange-500/30 bg-orange-900/10 p-3">
-                    <div className="flex items-start gap-2">
-                      <div className="mt-0.5 text-orange-400">⚠️</div>
-                      <div className="flex-1">
-                        <div className="text-xs font-semibold text-orange-300">Slower Order Fills on Devnet</div>
-                        <div className="mt-1 text-[10px] text-orange-200/80 leading-relaxed">
-                          {['ETH', 'AVAX', 'MATIC', 'FTM'].includes(longToken) && `${longToken} `}
-                          {['ETH', 'AVAX', 'MATIC', 'FTM'].includes(shortToken) && `${shortToken} `}
-                          has lower liquidity on devnet. Orders may take 2-3 minutes to fill. For faster fills, consider using SOL or BTC pairs.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Allocation slider (purple theme, rounded-square thumb) */}
                 <div className="mt-5">
@@ -545,7 +662,7 @@ function Trade() {
                       min="0"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm"
+                      className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       placeholder="0"
                     />
                     <span className="text-xs text-foreground/70">USDC</span>
@@ -581,7 +698,7 @@ function Trade() {
                       value={takeProfitPercent}
                       onChange={(e) => setTakeProfitPercent(e.target.value)}
                       placeholder="e.g., 10"
-                      className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm"
+                      className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div>
@@ -591,12 +708,12 @@ function Trade() {
                       value={stopLossPercent}
                       onChange={(e) => setStopLossPercent(e.target.value)}
                       placeholder="e.g., 5"
-                      className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm"
+                      className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>
 
-                {/* Agent Elara - AI analysis (placeholder UI for ML engineer) */}
+                {/* Agent Elara - Real AI analysis */}
                 <div className="mt-5 rounded-xl border border-purple-600/40 bg-purple-900/10">
                   <button
                     type="button"
@@ -605,46 +722,105 @@ function Trade() {
                     aria-expanded={isAgentOpen}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-purple-500" />
+                      <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30 overflow-hidden">
+                        <Image 
+                          src="/AgentLogo.png" 
+                          alt="Agent Elara" 
+                          width={24} 
+                          height={24} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <div className="text-sm font-semibold text-purple-300">Agent Elara</div>
+                
                     </div>
                     <ChevronDown className={`w-4 h-4 text-purple-300 transition-transform ${isAgentOpen ? "rotate-180" : "rotate-0"}`} />
                   </button>
                   {isAgentOpen && (
                     <div className="px-3 pb-3 text-xs">
-                      <div className="flex items-center justify-between py-1">
-                        <span className="text-foreground/70">Correlation</span>
-                        <span className="text-purple-300">0.78</span>
-                      </div>
-                      <div className="flex items-center justify-between py-1">
-                        <span className="text-foreground/70">Cointegrated</span>
-                        <span className="text-purple-300">No</span>
-                      </div>
-                      <div className="flex items-center justify-between py-1">
-                        <span className="text-foreground/70">Roll ZScore</span>
-                        <span className="text-purple-300">-0.79</span>
-                      </div>
-                      <div className="flex items-center justify-between py-1">
-                        <span className="text-foreground/70">Volatility</span>
-                        <span className="text-purple-300">20%</span>
-                      </div>
-                      <div className="flex items-center justify-between py-1">
-                        <span className="text-foreground/70">Beta</span>
-                        <span className="text-purple-300">BTC: 57.2% ETH: 42.8%</span>
-                      </div>
-                      <div className="mt-2 flex items-center justify-between">
-                        <span className="text-foreground/70">Use Beta Ratio</span>
-                        <button
-                          type="button"
-                          onClick={() => setUseBetaRatio((v) => !v)}
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full border ${useBetaRatio ? "bg-purple-400 border-purple-300" : "bg-background/40 border-border"}`}
-                          aria-pressed={useBetaRatio}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-black transition ${useBetaRatio ? "translate-x-4" : "translate-x-1"}`}
-                          />
-                        </button>
-                      </div>
+                      {/* Loading State */}
+                      {agentLoading && (
+                        <div className="py-6 flex flex-col items-center justify-center gap-3">
+                          <div className="relative w-10 h-10">
+                            <div className="absolute inset-0 border-4 border-purple-600/20 rounded-full"></div>
+                            <div className="absolute inset-0 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                          </div>
+                          <div className="text-purple-300 text-[11px]">Analyzing pair...</div>
+                        </div>
+                      )}
+                      
+                      {/* Error State */}
+                      {!agentLoading && agentError && (
+                        <div className="py-4 text-center">
+                          <div className="text-red-400 text-[11px] mb-2">{agentError}</div>
+                          <button
+                            type="button"
+                            onClick={() => fetchAnalysis(`${longToken}-PERP`, `${shortToken}-PERP`, 100)}
+                            className="text-xs text-purple-400 hover:text-purple-300 underline"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Success State - Show Data */}
+                      {!agentLoading && !agentError && analysis && (
+                        <>
+                          {/* Signal */}
+                          <div className="flex items-center justify-between py-1 mb-2">
+                            <span className="text-foreground/70">Signal</span>
+                            <span className={`font-semibold ${
+                              analysis.signal.action === 'LONG' ? 'text-green-400' :
+                              analysis.signal.action === 'SHORT' ? 'text-red-400' :
+                              'text-purple-300'
+                            }`}>
+                              {analysis.signal.action}
+                            </span>
+                          </div>
+
+                          {/* Correlation */}
+                          <div className="flex items-center justify-between py-1">
+                            <span className="text-foreground/70">Correlation</span>
+                            <span className="text-purple-300">{analysis.analysis.correlation.toFixed(3)}</span>
+                          </div>
+
+                          {/* Z-Score */}
+                          <div className="flex items-center justify-between py-1">
+                            <span className="text-foreground/70">Z-Score</span>
+                            <span className={`font-medium ${
+                              Math.abs(analysis.analysis.zScore) > 2 ? 'text-yellow-400' :
+                              Math.abs(analysis.analysis.zScore) > 1.5 ? 'text-orange-400' :
+                              'text-purple-300'
+                            }`}>
+                              {analysis.analysis.zScore.toFixed(2)}σ
+                            </span>
+                          </div>
+
+                          {/* Beta */}
+                          <div className="flex items-center justify-between py-1">
+                            <span className="text-foreground/70">Beta</span>
+                            <span className="text-purple-300">{analysis.analysis.beta.toFixed(3)}</span>
+                          </div>
+
+                          {/* Spread */}
+                          <div className="flex items-center justify-between py-1">
+                            <span className="text-foreground/70">Spread</span>
+                            <span className="text-purple-300 text-[10px]">
+                              {analysis.analysis.currentSpread.toFixed(2)}
+                            </span>
+                          </div>
+
+                          {/* Refresh button */}
+                          <button
+                            type="button"
+                            onClick={() => fetchAnalysis(`${longToken}-PERP`, `${shortToken}-PERP`, 100)}
+                            disabled={agentLoading}
+                            className="mt-3 w-full py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-xs font-medium transition-colors disabled:opacity-50"
+                          >
+                            Refresh Analysis
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -665,36 +841,13 @@ function Trade() {
                     : 'Open Position'
                   }
                 </button>
-                
-                {loading && (
-                  <div className="mt-2 text-xs text-purple-300 text-center space-y-1">
-                    <div>⏳ This may take a few moments...</div>
-                    <div className="text-foreground/60">
-                      {wallet.connected && (
-                        <>
-                          • Checking SOL balance<br/>
-                          • Depositing collateral (1 signature)<br/>
-                          • Opening BOTH positions (1 signature)<br/>
-                          <br/>
-                          <span className="text-purple-300">✨ 2 signatures total</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {error && (
-                  <div className="mt-2 text-xs text-red-400 text-center">
-                    {error}
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Right: header + chart */}
-            <div className="lg:col-span-2 space-y-3">
-              {/* Top metrics/header aligned above chart to mirror screenshot */}
-              <div className="rounded-2xl border border-border/60 bg-background/30 backdrop-blur-xl px-4 py-3">
+            {/* Right: header + chart - Full Height */}
+            <div className="flex flex-col h-full space-y-3 overflow-hidden">
+              {/* Top metrics/header - pear.garden style */}
+              <div className="rounded-xl border border-[#1a1a1a] bg-[#0F110F] px-4 py-2 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-base font-semibold">
@@ -734,20 +887,23 @@ function Trade() {
                 </div>
               </div>
 
-              {/* Chart */}
-              <PairChart 
-                longToken={longToken} 
-                shortToken={shortToken}
-                entryRatio={currentPosition?.entryRatio}
-              />
+              {/* Chart - Takes remaining space */}
+              <div className="flex-1 min-h-0">
+                <PairChart 
+                  longToken={longToken} 
+                  shortToken={shortToken}
+                  entryRatio={currentPosition?.entryRatio}
+                />
+              </div>
               
-              {/* Order History Panel */}
-              <div className="mt-4">
+              {/* Order History Panel - pear.garden extended height */}
+              <div className="h-[300px] flex-shrink-0">
                 <OrderHistory longToken={longToken} shortToken={shortToken} />
               </div>
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       {/* Token selector modal */}
@@ -759,9 +915,9 @@ function Trade() {
         >
           <div className="absolute inset-0 bg-black/70" onClick={() => setIsSelectorOpen(false)} />
           <div className="relative w-full max-w-3xl mx-auto rounded-2xl border border-border/60 bg-background/95 backdrop-blur-xl shadow-xl p-4">
-            <div className="rounded-xl bg-gradient-to-br from-emerald-900/30 to-purple-900/30 border border-border/40 px-4 py-6">
-              <div className="text-lg font-semibold">Select {selectingSide === "long" ? "Long" : "Short"} Token</div>
-              <div className="text-xs text-foreground/70">Select a token to go {selectingSide}</div>
+            <div className="rounded-xl bg-black border border-border/40 px-4 py-6">
+              <div className="text-lg font-semibold text-center">Select {selectingSide === "long" ? "Long" : "Short"} Token</div>
+              <div className="text-xs text-foreground/70 text-center">Select a token to go {selectingSide}</div>
             </div>
             <div className="mt-4">
               <input
@@ -774,38 +930,38 @@ function Trade() {
             </div>
             <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-1">
               {TOKENS.filter((t) => t.toLowerCase().includes(searchTerm.toLowerCase())).map((t) => {
-                const isLowLiquidity = ['ETH', 'AVAX', 'MATIC', 'FTM'].includes(t);
+                // Check if this token would create a same-pair (e.g., ETH/ETH)
+                const wouldCreateSamePair = (selectingSide === "long" && t === shortToken) || (selectingSide === "short" && t === longToken);
+                const isDisabled = wouldCreateSamePair;
+                
                 return (
                 <button
                   key={t}
                   onClick={() => {
+                    if (isDisabled) return;
                     if (selectingSide === "long") setLongToken(t);
                     else setShortToken(t);
                     setIsSelectorOpen(false);
                     setSearchTerm("");
                   }}
                     className={`flex flex-col items-start rounded-xl px-4 py-3 border transition-colors ${
-                    (selectingSide === "long" ? longToken === t : shortToken === t)
+                    isDisabled
+                      ? "border-border/50 bg-background/10 opacity-50 cursor-not-allowed"
+                      : (selectingSide === "long" ? longToken === t : shortToken === t)
                       ? "border-purple-500/60 bg-purple-900/20"
                       : "border-border bg-background/30 hover:bg-background/50"
                   }`}
+                  disabled={isDisabled}
                 >
-                    <div className="flex items-center justify-between w-full mb-1">
                   <div className="flex items-center gap-3">
-                        <TokenLogo token={t} size={24} />
+                    <TokenLogo token={t} size={24} />
                     <div className="text-sm font-medium">{t}</div>
-                  </div>
-                      {isLowLiquidity && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">
-                          Slow
-                        </span>
-                      )}
-                    </div>
-                    {isLowLiquidity && (
-                      <div className="text-[10px] text-orange-400/80 leading-tight">
-                        Lower liquidity on devnet - may take 2-3 min to fill
-                      </div>
+                    {isDisabled && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
+                        Same Pair
+                      </span>
                     )}
+                  </div>
                 </button>
                 );
               })}

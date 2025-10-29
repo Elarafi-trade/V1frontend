@@ -4,7 +4,6 @@ import type React from "react"
 import { useState, useEffect } from "react"
 
 import Hyperspeed from "@/components/Hyperspeed"
-import Link from "next/link"
 import Image from "next/image"
 import ElectricBorder from "@/components/ElectricBorder"
 import TiltedCard from "@/components/TiltedCard"
@@ -133,13 +132,13 @@ const Home: React.FC = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6">
-              <Link
+              <a
                 href="/Trade"
-                className="px-6 py-3 rounded-full bg-purple-600 text-white font-semibold text-sm hover:bg-purple-500 transition-all shadow-lg hover:shadow-purple-500/50"
+                className="px-6 py-3 rounded-full bg-purple-600 text-white font-semibold text-sm hover:bg-purple-500 transition-all shadow-lg hover:shadow-purple-500/50 cursor-pointer"
               >
                 Start Trading
-              </Link>
-              <button className="px-6 py-3 rounded-full border border-purple-600/40 bg-purple-600/5 backdrop-blur-sm text-white font-semibold text-sm hover:bg-purple-600/10 hover:border-purple-600/60 transition-all shadow-lg hover:shadow-purple-500/50">
+              </a>
+              <button className="px-6 py-3 rounded-full border border-purple-600/40 bg-purple-600/5 backdrop-blur-sm text-white font-semibold text-sm hover:bg-purple-600/10 hover:border-purple-600/60 transition-all shadow-lg hover:shadow-purple-500/50 cursor-pointer">
                 Learn More
               </button>
             </div>
@@ -227,9 +226,9 @@ const Home: React.FC = () => {
                 </div>
 
                 {/* Open Position Button */}
-                <button className="w-full py-2.5 sm:py-3 rounded-xl bg-purple-600 text-white cursor-pointer font-bold text-sm sm:text-base hover:bg-purple-500 transition-all shadow-lg hover:shadow-purple-500/50">
+                <a href="/Trade" className="w-full py-2.5 sm:py-3 rounded-xl bg-purple-600 text-white cursor-pointer font-bold text-sm sm:text-base hover:bg-purple-500 transition-all shadow-lg hover:shadow-purple-500/50 flex items-center justify-center">
                   Open Position
-                </button>
+                </a>
               </div>
 
               {/* </ElectricBorder> */}
@@ -504,9 +503,9 @@ const Home: React.FC = () => {
                       </div>
                     </div>
 
-                    <button className="w-full py-2 mt-10 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs hover:from-purple-600 hover:to-purple-700 transition-all">
+                    <a href="/Trade" className="w-full py-2 mt-10 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs hover:from-purple-600 hover:to-purple-700 transition-all flex items-center justify-center">
                       Open Position
-                    </button>
+                    </a>
                   </div>
 
                   {/* Card 2 - LDO/SIREN (Middle) */}
@@ -570,9 +569,9 @@ const Home: React.FC = () => {
                       </div>
                     </div>
 
-                    <button className="w-full py-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs hover:from-purple-600 hover:to-purple-700 transition-all">
+                    <a href="/Trade" className="w-full py-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs hover:from-purple-600 hover:to-purple-700 transition-all flex items-center justify-center">
                       Open Position
-                    </button>
+                    </a>
                   </div>
 
                   {/* Card 3 - USUAL/MOODENG (Front) */}
@@ -632,9 +631,9 @@ const Home: React.FC = () => {
                       </div>
                     </div>
 
-                    <button className="w-full py-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs hover:from-purple-600 hover:to-purple-700 transition-all">
+                    <a href="/Trade" className="w-full py-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs hover:from-purple-600 hover:to-purple-700 transition-all flex items-center justify-center">
                       Open Position
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -795,7 +794,7 @@ const Home: React.FC = () => {
                     <h3 className="text-white font-bold text-base">Leverage and Flexibility</h3>
                   </div>
                   <p className="text-gray-400 text-sm leading-relaxed">
-                    Trade over 500+ tokens with flexible leverage options—tailor your strategy to any market condition.
+                    Trade over 3 tokens with flexible leverage options—tailor your strategy to any market condition.
                   </p>
                 </div>
               </div>

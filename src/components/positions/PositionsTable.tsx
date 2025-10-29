@@ -29,19 +29,21 @@ interface PositionsTableProps {
   onClose: (positionId: string) => void;
   onCloseAll: () => void;
   loading?: boolean;
+  closingPositions?: Set<string>;
 }
 
 export function PositionsTable({ 
   positions, 
   onClose, 
   onCloseAll,
-  loading = false 
+  loading = false,
+  closingPositions = new Set()
 }: PositionsTableProps) {
   if (positions.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <div className="text-lg">No open positions</div>
-        <div className="text-sm mt-2">Open a position to see it here</div>
+      <div className="text-center py-12 text-[#717171]">
+        <div className="text-sm">No open positions</div>
+        <div className="text-xs mt-2">Open a position to see it here</div>
       </div>
     );
   }
@@ -49,39 +51,39 @@ export function PositionsTable({
   return (
     <div className="relative">
       {/* Close All Button */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-3">
         <button 
           onClick={onCloseAll}
           disabled={loading}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium transition-colors"
+          className="px-3 py-1.5 bg-[#A2DB5C] hover:bg-[#8cc745] disabled:bg-[#1a1a1a] disabled:cursor-not-allowed disabled:text-[#717171] rounded-lg text-black font-semibold text-xs transition-colors"
         >
-          Close All Positions ({positions.length})
+          Close All ({positions.length})
         </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-800">
+      {/* Table - pear.garden style */}
+      <div className="overflow-x-auto rounded-lg border border-[#1a1a1a]">
         <table className="w-full">
-          <thead className="bg-gray-900/50">
-            <tr className="border-b border-gray-700 text-gray-400 text-sm">
-              <th className="text-left p-3 font-medium">Pair</th>
-              <th className="text-right p-3 font-medium">Size</th>
-              <th className="text-right p-3 font-medium">Entry Price</th>
-              <th className="text-right p-3 font-medium">Mark Price</th>
-              <th className="text-right p-3 font-medium">P&L</th>
-              <th className="text-right p-3 font-medium">Margin</th>
-              <th className="text-right p-3 font-medium">Liq Price</th>
-              <th className="text-center p-3 font-medium">TP/SL</th>
-              <th className="text-center p-3 font-medium">Actions</th>
+          <thead className="bg-[#080807]">
+            <tr className="border-b border-[#1a1a1a] text-[#717171] text-xs">
+              <th className="text-left p-2 font-semibold">Pair</th>
+              <th className="text-right p-2 font-semibold">Size</th>
+              <th className="text-right p-2 font-semibold">Entry</th>
+              <th className="text-right p-2 font-semibold">Mark</th>
+              <th className="text-right p-2 font-semibold">P&L</th>
+              <th className="text-right p-2 font-semibold">Margin</th>
+              <th className="text-right p-2 font-semibold">Liq</th>
+              <th className="text-center p-2 font-semibold">TP/SL</th>
+              <th className="text-center p-2 font-semibold">Action</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-900/20">
+          <tbody className="bg-[#0F110F]/30">
             {positions.map(position => (
               <PositionRow 
                 key={position.id}
                 position={position}
                 onClose={() => onClose(position.id)}
-                loading={loading}
+                loading={closingPositions.has(position.id)}
               />
             ))}
           </tbody>
@@ -89,13 +91,12 @@ export function PositionsTable({
       </div>
 
       {/* Summary Stats */}
-      <div className="mt-4 flex gap-6 text-sm text-gray-400">
+      <div className="mt-3 flex gap-4 text-xs text-[#717171]">
         <div>
-          <span className="font-medium">Total Positions:</span> {positions.length}
+          <span className="font-medium">Positions:</span> <span className="text-white">{positions.length}</span>
         </div>
         <div>
-          <span className="font-medium">Total Capital:</span> $
-          {positions.reduce((sum, p) => sum + p.capitalUSDC, 0).toLocaleString()}
+          <span className="font-medium">Capital:</span> <span className="text-white">${positions.reduce((sum, p) => sum + p.capitalUSDC, 0).toLocaleString()}</span>
         </div>
       </div>
     </div>

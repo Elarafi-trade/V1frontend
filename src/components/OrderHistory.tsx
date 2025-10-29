@@ -11,6 +11,7 @@ import { PendingOrder } from './positions/OrderRow';
 import { TradeHistoryTable } from './positions/TradeHistoryTable';
 import { ClosedTrade } from './positions/TradeHistoryRow';
 import { positionEvents } from '@/lib/events/positionEvents';
+import toast from 'react-hot-toast';
 
 interface Trade {
   id: string;
@@ -62,7 +63,7 @@ export default function OrderHistory({ longToken, shortToken }: OrderHistoryProp
   const [tradeHistory, setTradeHistory] = useState<Trade[]>([]);
   const [pendingOrders, setPendingOrders] = useState<PendingOrder[]>([]);
   const [loading, setLoading] = useState(false);
-  const [closingPosition, setClosingPosition] = useState<string | null>(null);
+  const [closingPositions, setClosingPositions] = useState<Set<string>>(new Set());
 
   // Fetch initial data from database (ONCE)
   useEffect(() => {
@@ -218,7 +219,11 @@ export default function OrderHistory({ longToken, shortToken }: OrderHistoryProp
   const handleCloseSinglePosition = async (positionId: string) => {
     if (!wallet.publicKey) return;
     
-    setClosingPosition(positionId);
+    // Find the position being closed
+    const position = openPositions.find(p => p.id === positionId);
+    const pairName = position ? `${position.longMarketSymbol}/${position.shortMarketSymbol}` : 'Position';
+    
+    setClosingPositions(prev => new Set(prev).add(positionId));
     try {
       console.log('🔒 Closing position:', positionId);
       await closePairTrade(positionId);
@@ -240,11 +245,34 @@ export default function OrderHistory({ longToken, shortToken }: OrderHistoryProp
       }
       
       console.log('✅ Position closed and UI updated');
+      
+      // Show success toast
+      toast.success(`${pairName} closed successfully!`, {
+        style: {
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #22c55e',
+        },
+        duration: 4000,
+      });
     } catch (error) {
       console.error('Error closing position:', error);
-      alert(`Failed to close position: ${error}`);
+      
+      // Show error toast
+      toast.error(`Failed to close position: ${error}`, {
+        style: {
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #ef4444',
+        },
+        duration: 5000,
+      });
     } finally {
-      setClosingPosition(null);
+      setClosingPositions(prev => {
+        const next = new Set(prev);
+        next.delete(positionId);
+        return next;
+      });
     }
   };
 
@@ -360,59 +388,60 @@ export default function OrderHistory({ longToken, shortToken }: OrderHistoryProp
   };
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-background/30 backdrop-blur-xl p-4">
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-border/40 pb-2">
+    <div className="h-full flex flex-col rounded-xl border border-[#1a1a1a] bg-[#0F110F] p-3">
+      {/* Tabs - Purple theme */}
+      <div className="flex gap-1 border-b border-[#1a1a1a] pb-1.5 flex-shrink-0">
         <button
           onClick={() => setActiveTab('positions')}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
             activeTab === 'positions'
-              ? 'bg-purple-600 text-white'
-              : 'text-foreground/60 hover:text-foreground hover:bg-background/40'
+              ? 'bg-[#A855F7] text-white'
+              : 'text-[#717171] hover:text-white hover:bg-[#1a1a1a]'
           }`}
         >
           Open Positions ({filteredPositions.length})
         </button>
         <button
           onClick={() => setActiveTab('orders')}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
             activeTab === 'orders'
-              ? 'bg-purple-600 text-white'
-              : 'text-foreground/60 hover:text-foreground hover:bg-background/40'
+              ? 'bg-[#A855F7] text-white'
+              : 'text-[#717171] hover:text-white hover:bg-[#1a1a1a]'
           }`}
         >
           Open Orders
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
             activeTab === 'history'
-              ? 'bg-purple-600 text-white'
-              : 'text-foreground/60 hover:text-foreground hover:bg-background/40'
+              ? 'bg-[#A855F7] text-white'
+              : 'text-[#717171] hover:text-white hover:bg-[#1a1a1a]'
           }`}
         >
           Trade History
         </button>
         <button
           onClick={() => setActiveTab('twap')}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
             activeTab === 'twap'
-              ? 'bg-purple-600 text-white'
-              : 'text-foreground/60 hover:text-foreground hover:bg-background/40'
+              ? 'bg-[#A855F7] text-white'
+              : 'text-[#717171] hover:text-white hover:bg-[#1a1a1a]'
           }`}
         >
           TWAP
         </button>
       </div>
 
-      {/* Content */}
-      <div className="mt-4">
+      {/* Content - Scrollable */}
+      <div className="mt-2 flex-1 overflow-y-auto scrollbar-hide">
         {activeTab === 'positions' && (
           <PositionsTable
             positions={filteredPositions}
             onClose={handleCloseSinglePosition}
             onCloseAll={handleCloseAll}
-            loading={!!closingPosition}
+            loading={closingPositions.size > 0}
+            closingPositions={closingPositions}
           />
         )}
 

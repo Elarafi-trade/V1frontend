@@ -22,9 +22,9 @@ export function OrdersTable({
 }: OrdersTableProps) {
   if (orders.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <div className="text-lg">No pending orders</div>
-        <div className="text-sm mt-2">Orders waiting to be filled will appear here</div>
+      <div className="text-center py-12 text-[#717171]">
+        <div className="text-sm">No pending orders</div>
+        <div className="text-xs mt-2">Orders waiting to be filled will appear here</div>
       </div>
     );
   }
@@ -32,33 +32,33 @@ export function OrdersTable({
   return (
     <div className="relative">
       {/* Cancel All Button */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-3">
         <button 
           onClick={onCancelAll}
           disabled={loading}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-medium transition-colors"
+          className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 disabled:bg-[#1a1a1a] disabled:cursor-not-allowed disabled:text-[#717171] rounded-lg text-red-400 font-semibold text-xs transition-colors border border-red-500/30"
         >
-          Cancel All Orders ({orders.length})
+          Cancel All ({orders.length})
         </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-800">
+      {/* Table - pear.garden style */}
+      <div className="overflow-x-auto rounded-lg border border-[#1a1a1a]">
         <table className="w-full">
-          <thead className="bg-gray-900/50">
-            <tr className="border-b border-gray-700 text-gray-400 text-sm">
-              <th className="text-left p-3 font-medium">Time</th>
-              <th className="text-left p-3 font-medium">Pair</th>
-              <th className="text-left p-3 font-medium">Market</th>
-              <th className="text-center p-3 font-medium">Action</th>
-              <th className="text-center p-3 font-medium">Type</th>
-              <th className="text-right p-3 font-medium">Size</th>
-              <th className="text-right p-3 font-medium">Filled</th>
-              <th className="text-right p-3 font-medium">Price</th>
-              <th className="text-center p-3 font-medium">Actions</th>
+          <thead className="bg-[#080807]">
+            <tr className="border-b border-[#1a1a1a] text-[#717171] text-xs">
+              <th className="text-left p-2 font-semibold">Time</th>
+              <th className="text-left p-2 font-semibold">Pair</th>
+              <th className="text-left p-2 font-semibold">Market</th>
+              <th className="text-center p-2 font-semibold">Side</th>
+              <th className="text-center p-2 font-semibold">Type</th>
+              <th className="text-right p-2 font-semibold">Size</th>
+              <th className="text-right p-2 font-semibold">Filled</th>
+              <th className="text-right p-2 font-semibold">Price</th>
+              <th className="text-center p-2 font-semibold">Action</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-900/20">
+          <tbody className="bg-[#0F110F]/30">
             {orders.map(order => (
               <OrderRow 
                 key={order.id}
@@ -72,8 +72,8 @@ export function OrdersTable({
       </div>
 
       {/* Summary */}
-      <div className="mt-4 text-sm text-gray-400">
-        <span className="font-medium">Total Pending:</span> {orders.length} order{orders.length !== 1 ? 's' : ''}
+      <div className="mt-3 text-xs text-[#717171]">
+        <span className="font-medium">Pending:</span> <span className="text-white">{orders.length}</span>
       </div>
     </div>
   );

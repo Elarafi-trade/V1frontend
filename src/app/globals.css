@@ -264,3 +264,15 @@
   background-color: color-mix(in oklab, var(--background), transparent 65%) !important;
   border: 1px solid var(--border) !important;
 }
+
+/* Hide scrollbar while maintaining scroll functionality */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+}

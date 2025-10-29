@@ -107,9 +107,13 @@ export default function DashboardPage() {
   
   // Expose refresh function globally for deposit/withdraw modal
   useEffect(() => {
-    (window as any).refreshDashboard = fetchAccountBalance;
+    if (typeof window !== 'undefined') {
+      (window as any).refreshDashboard = fetchAccountBalance;
+    }
     return () => {
-      delete (window as any).refreshDashboard;
+      if (typeof window !== 'undefined') {
+        delete (window as any).refreshDashboard;
+      }
     };
   }, [fetchAccountBalance]);
 
@@ -320,6 +324,131 @@ export default function DashboardPage() {
   const walletAddress = wallet.publicKey?.toString() || '';
   const displayAddress = formatAddress(walletAddress);
 
+  // Skeleton loader component
+  const DashboardSkeleton = () => (
+    <div className="min-h-screen bg-[#0a0a0a] p-4 md:p-8 mt-15">
+      <div className="max-w-7xl mx-auto">
+        {/* Main Grid Skeleton */}
+        <div className="flex flex-col md:grid grid-cols-2 w-full max-w-6xl mx-auto gap-0 bg-black p-4 rounded-2xl">
+          {/* Left Column Skeleton */}
+          <div className="col-span-1 flex flex-col gap-4 border-b md:border-b-0 md:border-r border-[#282828] pb-4 pr-0 md:pr-4 md:pb-0">
+            {/* Platform Name Skeleton */}
+            <div className="relative overflow-hidden w-full">
+              <div className="h-full w-full rounded-[inherit]">
+                <div className="w-full flex gap-6 border-b border-[#282828]">
+                  <div className="w-full px-4 py-3 border-b-2 border-[#A855F7]">
+                    <div className="h-4 w-12 bg-[#1a1a1a] rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Account List Skeleton */}
+            <div className="relative">
+              <div className="h-[225px] md:h-[279px] overflow-y-auto rounded-md w-full">
+                <div className="flex items-center justify-center pr-3">
+                  <div className="flex flex-col gap-2 w-full h-full">
+                    <div className="flex items-center justify-between w-full bg-[#1a1a1a] rounded-lg p-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 bg-[#2a1a3a] rounded-full animate-pulse"></div>
+                        <div className="h-4 w-20 bg-[#2a1a3a] rounded animate-pulse"></div>
+                      </div>
+                      <div className="h-4 w-24 bg-[#2a1a3a] rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons Skeleton */}
+            <div className="flex flex-col md:flex-row gap-3 justify-between w-full h-fit md:h-[42px]">
+              <div className="w-full h-[42px] bg-[#2a1a3a] rounded-lg animate-pulse"></div>
+              <div className="w-full h-[42px] bg-[#2a1a3a] rounded-lg animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Right Column Skeleton */}
+          <div className="col-span-2 sm:col-span-1 flex flex-col justify-between gap-4 pt-4 pl-0 md:pt-0 md:pl-4">
+            <div className="w-full bg-black text-white border-0 p-0 flex flex-col gap-4">
+              {/* Chart Controls Skeleton */}
+              <div className="flex gap-4 flex-row justify-between items-start">
+                <div className="flex flex-col gap-2">
+                  <div className="h-[33px] w-[100px] bg-[#2a1a3a] rounded animate-pulse"></div>
+                  <div className="h-3 w-48 bg-[#1a1a1a] rounded animate-pulse"></div>
+                </div>
+                <div className="flex justify-end items-center gap-1 bg-[#0a0a0a] p-1 rounded-[8px] h-[33px]">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="h-[25px] w-10 bg-[#1a1a1a] rounded animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chart Skeleton */}
+              <div className="h-[274px] w-full min-w-0 bg-[#1a1a1a] rounded-lg animate-pulse flex items-center justify-center">
+                <div className="text-[#666666] text-sm">Loading chart...</div>
+              </div>
+
+              {/* Stats Skeleton */}
+              <div className="flex flex-col sm:grid grid-cols-3 gap-0 sm:gap-4 text-center bg-[#1a1a1a] p-2 rounded-lg h-[143px] sm:h-[62px]">
+                <div className="sm:border-r border-[#282828] border-b sm:border-b-0 pb-4 sm:pb-0 flex items-center justify-between sm:justify-center gap-1 flex-row sm:flex-col">
+                  <div className="h-3 w-12 bg-[#2a1a3a] rounded animate-pulse"></div>
+                  <div className="h-4 w-16 bg-[#2a1a3a] rounded animate-pulse"></div>
+                </div>
+                <div className="border-b sm:border-b-0 py-4 sm:py-0 sm:border-r border-[#282828] flex items-center justify-between sm:justify-center gap-1 flex-row sm:flex-col">
+                  <div className="h-3 w-12 bg-[#2a1a3a] rounded animate-pulse"></div>
+                  <div className="h-4 w-16 bg-[#2a1a3a] rounded animate-pulse"></div>
+                </div>
+                <div className="pt-4 sm:pt-0 flex items-center justify-between sm:justify-center gap-1 flex-row sm:flex-col">
+                  <div className="h-3 w-20 bg-[#2a1a3a] rounded animate-pulse"></div>
+                  <div className="h-4 w-16 bg-[#2a1a3a] rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Stats Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6 max-w-6xl mx-auto">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-black rounded-xl p-4 border border-[#282828]">
+              <div className="h-3 w-20 bg-[#2a1a3a] rounded animate-pulse mb-2"></div>
+              <div className="h-6 w-24 bg-[#2a1a3a] rounded animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Positions Section Skeleton */}
+        <div className="bg-black rounded-2xl mt-6 border border-[#282828] overflow-hidden max-w-6xl mx-auto">
+          {/* Tabs Skeleton */}
+          <div className="border-b border-[#282828]">
+            <div className="flex gap-0 px-4">
+              <div className="px-6 py-4">
+                <div className="h-4 w-28 bg-[#2a1a3a] rounded animate-pulse"></div>
+              </div>
+              <div className="px-6 py-4">
+                <div className="h-4 w-24 bg-[#2a1a3a] rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="p-4">
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-16 bg-[#1a1a1a] rounded-lg animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Show skeleton while wallet is not connected or data is loading
+  if (!wallet.publicKey || loading) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] p-4 md:p-8 mt-15">
       <div className="max-w-7xl mx-auto">
@@ -515,7 +644,7 @@ export default function DashboardPage() {
         <div className="bg-black rounded-2xl mt-6 border border-[#282828] overflow-hidden max-w-6xl mx-auto">
           {/* Tabs */}
           <div className="border-b border-[#282828]">
-            <div className="flex gap-0">
+            <div className="flex gap-0 px-4">
               <button
                 onClick={() => setPositionsTab('open')}
                 className={`px-6 py-4 text-sm font-bold transition-colors relative ${
@@ -546,47 +675,49 @@ export default function DashboardPage() {
           </div>
 
           {/* Tab Content */}
-          {positionsTab === 'open' && (
-            <PositionsTable
-              positions={openPositions.map((pos): PositionData => ({
-                ...pos,
-                unrealizedPnL: pos.unrealizedPnL || pos.unrealizedPnl || 0,
-                unrealizedPnLPercent: pos.unrealizedPnLPercent || pos.unrealizedPnlPercent || 0,
-              }))}
-              onClose={(positionId) => {
-                const position = openPositions.find(p => p.id === positionId);
-                if (position) handleClosePosition(position);
-              }}
-              onCloseAll={async () => {
-                for (const position of openPositions) {
-                  await handleClosePosition(position);
-                }
-              }}
-              loading={loading}
-            />
-          )}
+          <div className="p-4">
+            {positionsTab === 'open' && (
+              <PositionsTable
+                positions={openPositions.map((pos): PositionData => ({
+                  ...pos,
+                  unrealizedPnL: pos.unrealizedPnL || pos.unrealizedPnl || 0,
+                  unrealizedPnLPercent: pos.unrealizedPnLPercent || pos.unrealizedPnlPercent || 0,
+                }))}
+                onClose={(positionId) => {
+                  const position = openPositions.find(p => p.id === positionId);
+                  if (position) handleClosePosition(position);
+                }}
+                onCloseAll={async () => {
+                  for (const position of openPositions) {
+                    await handleClosePosition(position);
+                  }
+                }}
+                loading={loading}
+              />
+            )}
 
-          {positionsTab === 'history' && (
-            <TradeHistoryTable
-              trades={closedPositions.map((pos): ClosedTrade => ({
-                id: pos.id,
-                longMarketSymbol: pos.longMarketSymbol,
-                shortMarketSymbol: pos.shortMarketSymbol,
-                closeTimestamp: pos.closeTimestamp ? new Date(pos.closeTimestamp) : new Date(),
-                realizedPnL: pos.realizedPnL || 0,
-                realizedPnLPercent: pos.realizedPnLPercent || 0,
-                capitalUSDC: pos.capitalUSDC,
-                leverage: pos.leverage,
-                entryLongPrice: pos.entryLongPrice,
-                entryShortPrice: pos.entryShortPrice,
-                entryRatio: pos.entryRatio,
-                closeLongPrice: pos.closeLongPrice || 0,
-                closeShortPrice: pos.closeShortPrice || 0,
-                closeRatio: pos.closeRatio || 0,
-              }))}
-              loading={loading}
-            />
-          )}
+            {positionsTab === 'history' && (
+              <TradeHistoryTable
+                trades={closedPositions.map((pos): ClosedTrade => ({
+                  id: pos.id,
+                  longMarketSymbol: pos.longMarketSymbol,
+                  shortMarketSymbol: pos.shortMarketSymbol,
+                  closeTimestamp: pos.closeTimestamp ? new Date(pos.closeTimestamp) : new Date(),
+                  realizedPnL: pos.realizedPnL || 0,
+                  realizedPnLPercent: pos.realizedPnLPercent || 0,
+                  capitalUSDC: pos.capitalUSDC,
+                  leverage: pos.leverage,
+                  entryLongPrice: pos.entryLongPrice,
+                  entryShortPrice: pos.entryShortPrice,
+                  entryRatio: pos.entryRatio,
+                  closeLongPrice: pos.closeLongPrice || 0,
+                  closeShortPrice: pos.closeShortPrice || 0,
+                  closeRatio: pos.closeRatio || 0,
+                }))}
+                loading={loading}
+              />
+            )}
+          </div>
         </div>
       </div>
 

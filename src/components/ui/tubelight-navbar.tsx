@@ -1,8 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
-import Link from 'next/link';
+import { Menu, Bell, Globe } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -25,109 +24,117 @@ export function NavBar({ items, className }: { items: NavItem[]; className?: str
     setMounted(true);
   }, []);
 
-  // No theme changes here; dark mode is enforced at the root html
-
   return (
-    <nav className={cn("fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-full border backdrop-blur-lg bg-background/30 shadow-sm transition-all mx-auto max-w-5xl w-[90%]", className)}>
-      <div className="container mx-auto flex justify-between items-center px-6 py-2">
-        {/* Logo */}
-        <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-2">
-          <Image 
-            src="/ElaraFiLogo.png" 
-            alt="ElaraFi Logo" 
-            width={45} 
-            height={45} 
-            className="rounded-full object-cover"
-          />
-          <p className="text-white text-2xl font-bold">ElaraFi</p>
-        </Link>
+    <nav className={cn("fixed top-0 left-0 right-0 z-50 w-full bg-[#0F110F] border-b border-transparent px-4 py-1.5 transition-all duration-300 ease-in-out", className)}>
+      <div className="flex items-center justify-between w-full">
+        {/* Left: Logo + Nav Links */}
+        <div className="flex items-center gap-16">
+          {/* Logo */}
+          <a href="/" className="flex items-center gap-2 cursor-pointer">
+            <Image 
+              src="/ElaraFiLogo.png" 
+              alt="ElaraFi Logo" 
+              width={32} 
+              height={32} 
+              className="rounded-full object-cover"
+            />
+            <span className="text-white text-xl font-semibold">ElaraFi</span>
+          </a>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-4">
-          {items.map((item: NavItem) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.url;
+          {/* Desktop Navigation Links */}
+          <nav className="hidden min-[1140px]:flex items-center gap-6">
+            {items.map((item: NavItem) => {
+              const isActive = pathname === item.url;
 
-            return (
-              <Link
-                key={item.name}
-                href={item.url}
-                className={cn(
-                  "flex items-center gap-2 text-sm font-medium rounded-full px-4 py-2 text-foreground/80 hover:bg-muted/50 transition-colors",
-                  isActive && "text-purple-400 bg-purple-600/10"
-                )}
-              >
-                <Icon size={18} strokeWidth={2} />
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
+              return (
+                <a
+                  key={item.name}
+                  href={item.url}
+                  className={cn(
+                    "text-sm font-semibold px-2 py-1.5 bg-transparent hover:text-white transition-colors cursor-pointer",
+                    isActive ? "text-white" : "text-[#717171]"
+                  )}
+                >
+                  {item.name}
+                </a>
+              );
+            })}
+          </nav>
+        </div>
 
-          {/* Dark Mode Toggle */}
-         
+        {/* Right: Search + Wallet + Icons */}
+        <div className="flex items-center gap-2">
+          {/* Search Pair Button */}
+          <div className="hidden min-[744px]:flex items-center gap-2 p-2 bg-[#2a1a3a] hover:bg-[#3a2450] rounded-lg cursor-pointer">
+            <div className="text-xs font-semibold text-white rounded bg-[#A855F7] w-[25px] h-[25px] flex items-center justify-center">
+              /
+            </div>
+            <div className="text-white/70 text-xs font-semibold pr-2">Search Pair</div>
+          </div>
 
-          {/* Wallet Button - only render on client to avoid hydration mismatch */}
+          {/* Wallet Button - purple style */}
           {mounted && (
             <WalletMultiButton
-              style={{
-                background: 'linear-gradient(to right, rgb(147, 51, 234), rgb(126, 34, 206))',
-                color: 'white',
-                fontWeight: 'bold'
-              }}
               className={cn(
-                "!rounded-full !bg-gradient-to-r !from-purple-600 !to-purple-700 !text-white hover:!from-purple-700 hover:!to-purple-800 !shadow-lg !shadow-purple-500/30",
-                "!px-4 !py-2 !text-sm !font-bold !transition-all !border-none"
+                "!inline-flex !items-center !justify-center !whitespace-nowrap !transition-colors",
+                "!shadow !cursor-pointer !bg-[#A855F7] hover:!bg-[#9333EA] !text-white",
+                "!font-bold !text-sm !rounded-lg !px-3 sm:!px-6 !py-3 !h-[42px] !border-none"
               )}
             />
           )}
-        </div>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden p-2 rounded-full hover:bg-muted/50 transition-colors"
-        >
-          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+          {/* Notification Icon */}
+          <div className="hidden min-[510px]:flex gap-2">
+            <button className="flex relative bg-[#2a1a3a] hover:bg-[#3a2450] rounded-lg p-[9px] cursor-pointer w-[42px] h-[42px] items-center justify-center">
+              <Bell className="w-5 h-5 text-white" />
+            </button>
+            
+            {/* Globe/Language Icon */}
+            <button className="flex relative bg-[#2a1a3a] hover:bg-[#3a2450] rounded-lg p-[9px] cursor-pointer w-[42px] h-[42px] items-center justify-center">
+              <Globe className="w-5 h-5" style={{ color: '#A855F7' }} />
+            </button>
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="flex min-[1140px]:hidden bg-[#2a1a3a] hover:bg-[#3a2450] rounded-lg p-[9px] cursor-pointer w-[42px] h-[42px] items-center justify-center"
+          >
+            <Menu className="h-5 w-5 text-white" />
+          </button>
+        </div>
         
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="absolute top-14 mt-[20px] left-0 right-0 bg-background/90 backdrop-blur-lg border-t border-border/50 shadow-lg md:hidden rounded-xl">
-          <div className="container mx-auto px-4 py-3">
+        <div className="absolute top-full left-0 right-0 bg-[#0F110F] border-t border-[#1a1a1a] shadow-lg min-[1140px]:hidden">
+          <div className="px-4 py-3">
             {items.map((item: NavItem) => {
-              const Icon = item.icon;
               const isActive = pathname === item.url;
 
               return (
-                <Link
+                <a
                   key={item.name}
                   href={item.url}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted/50",
-                    isActive && "text-purple-400 bg-purple-600/10"
+                    "block px-4 py-3 text-sm font-semibold rounded-lg hover:bg-[#1C221C] transition-colors cursor-pointer",
+                    isActive ? "text-white bg-[#1C221C]" : "text-[#717171]"
                   )}
                 >
-                  <Icon size={20} strokeWidth={2} />
-                  <span className="font-medium">{item.name}</span>
-                </Link>
+                  {item.name}
+                </a>
               );
             })}
 
-            {/* Wallet + Theme in Mobile */}
-            <div className="mt-3 flex flex-col gap-2 px-4">
+            {/* Mobile Wallet Button */}
+            <div className="mt-3 px-4">
               {mounted && (
                 <WalletMultiButton
-                  style={{
-                    background: 'linear-gradient(to right, rgb(147, 51, 234), rgb(126, 34, 206))',
-                    color: 'white',
-                    fontWeight: 'bold'
-                  }}
                   className={cn(
-                    "!w-full !justify-center !rounded-full !bg-gradient-to-r !from-purple-600 !to-purple-700 !text-white hover:!from-purple-700 hover:!to-purple-800 !shadow-lg !shadow-purple-500/30",
-                    "!px-4 !py-2 !text-sm !font-bold !transition-all !border-none"
+                    "!w-full !justify-center !bg-[#A2DB5C] hover:!bg-[#8cc745]",
+                    "!text-black !font-bold !text-sm !rounded-lg !px-6 !py-3 !h-[42px] !border-none"
                   )}
                 />
               )}

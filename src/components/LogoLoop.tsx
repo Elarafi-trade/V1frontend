@@ -51,6 +51,9 @@ const useResizeObserver = (
   dependencies: React.DependencyList
 ) => {
   useEffect(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
+    
     if (!window.ResizeObserver) {
       const handleResize = () => callback();
       window.addEventListener('resize', handleResize);

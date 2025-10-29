@@ -18,17 +18,17 @@ export function TradeHistoryTable({ trades, loading = false }: TradeHistoryTable
   if (loading) {
     return (
       <div className="py-12 text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-500 border-r-transparent"></div>
-        <div className="mt-2 text-gray-400">Loading trade history...</div>
+        <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-[#A855F7] border-r-transparent"></div>
+        <div className="mt-2 text-[#717171] text-xs">Loading...</div>
       </div>
     );
   }
 
   if (trades.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <div className="text-lg">No closed positions</div>
-        <div className="text-sm mt-2">Your trade history will appear here</div>
+      <div className="text-center py-12 text-[#717171]">
+        <div className="text-sm">No closed positions</div>
+        <div className="text-xs mt-2">Your trade history will appear here</div>
       </div>
     );
   }
@@ -41,49 +41,49 @@ export function TradeHistoryTable({ trades, loading = false }: TradeHistoryTable
 
   return (
     <div className="relative">
-      {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-4 p-4 bg-gray-900/30 rounded-lg border border-gray-800">
+      {/* Summary Stats - pear.garden style */}
+      <div className="grid grid-cols-4 gap-3 mb-3 p-3 bg-[#0F110F] rounded-lg border border-[#1a1a1a]">
         <div>
-          <div className="text-xs text-gray-400">Total P&L</div>
-          <div className={`text-lg font-semibold ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          <div className="text-[10px] text-[#717171]">Total P&L</div>
+          <div className={`text-sm font-semibold ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
           </div>
         </div>
         <div>
-          <div className="text-xs text-gray-400">Win Rate</div>
-          <div className="text-lg font-semibold text-gray-200">
+          <div className="text-[10px] text-[#717171]">Win Rate</div>
+          <div className="text-sm font-semibold text-white">
             {winRate.toFixed(1)}%
           </div>
         </div>
         <div>
-          <div className="text-xs text-gray-400">Avg P&L</div>
-          <div className={`text-lg font-semibold ${avgPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          <div className="text-[10px] text-[#717171]">Avg P&L</div>
+          <div className={`text-sm font-semibold ${avgPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {avgPnL >= 0 ? '+' : ''}${avgPnL.toFixed(2)}
           </div>
         </div>
         <div>
-          <div className="text-xs text-gray-400">Total Trades</div>
-          <div className="text-lg font-semibold text-gray-200">
+          <div className="text-[10px] text-[#717171]">Trades</div>
+          <div className="text-sm font-semibold text-white">
             {trades.length}
           </div>
         </div>
       </div>
 
-      {/* Trade History Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-800">
+      {/* Trade History Table - pear.garden style */}
+      <div className="overflow-x-auto rounded-lg border border-[#1a1a1a]">
         <table className="w-full">
-          <thead className="bg-gray-900/50">
-            <tr className="border-b border-gray-700 text-gray-400 text-sm">
-              <th className="text-left p-3 font-medium">Market</th>
-              <th className="text-left p-3 font-medium">Time</th>
-              <th className="text-left p-3 font-medium">P&L</th>
-              <th className="text-left p-3 font-medium">Size</th>
-              <th className="text-left p-3 font-medium">Entry Price</th>
-              <th className="text-left p-3 font-medium">Exit Price</th>
-              <th className="text-left p-3 font-medium">Price %</th>
+          <thead className="bg-[#080807]">
+            <tr className="border-b border-[#1a1a1a] text-[#717171] text-xs">
+              <th className="text-left p-2 font-semibold">Market</th>
+              <th className="text-left p-2 font-semibold">Time</th>
+              <th className="text-right p-2 font-semibold">P&L</th>
+              <th className="text-right p-2 font-semibold">Size</th>
+              <th className="text-right p-2 font-semibold">Entry</th>
+              <th className="text-right p-2 font-semibold">Exit</th>
+              <th className="text-right p-2 font-semibold">%</th>
             </tr>
           </thead>
-          <tbody className="bg-gray-900/20">
+          <tbody className="bg-[#0F110F]/30">
             {trades.map(trade => (
               <TradeHistoryRow 
                 key={trade.id}
@@ -95,9 +95,9 @@ export function TradeHistoryTable({ trades, loading = false }: TradeHistoryTable
       </div>
 
       {/* Footer Summary */}
-      <div className="mt-4 text-sm text-gray-400 flex justify-between">
+      <div className="mt-3 text-xs text-[#717171] flex justify-between">
         <span>
-          <span className="font-medium">Showing:</span> {trades.length} trade{trades.length !== 1 ? 's' : ''}
+          <span className="font-medium">Total:</span> <span className="text-white">{trades.length}</span>
         </span>
         <span>
           <span className="text-green-500">{profitableTrades} wins</span>

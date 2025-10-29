@@ -37,6 +37,9 @@ export default function PairChart({
   }, [longToken, shortToken]);
 
   useEffect(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
+    
     if (window.TradingView) {
       setIsScriptLoaded(true);
       return;
@@ -52,6 +55,8 @@ export default function PairChart({
   }, []);
 
   useEffect(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
     if (!isScriptLoaded || !chartContainerRef.current) return;
     if (widgetRef.current) {
       widgetRef.current.remove();
@@ -73,20 +78,6 @@ export default function PairChart({
       hide_side_toolbar: false,
       save_image: false,
       backgroundColor: "#0a0515",
-      studies_overrides: {},
-      disabled_features: ["use_localstorage_for_settings", "header_widget"],
-      enabled_features: ["study_templates"],
-      loading_screen: { backgroundColor: "#0a0515", foregroundColor: "#0a0515" },
-      overrides: {
-        "paneProperties.background": "#0a0515",
-        "paneProperties.backgroundType": "solid",
-        "paneProperties.vertGridProperties.color": "#1a1a1a",
-        "paneProperties.horzGridProperties.color": "#1a1a1a",
-        "symbolWatermarkProperties.transparency": 90,
-        "scalesProperties.textColor": "#AAA",
-        "mainSeriesProperties.candleStyle.upColor": "#26a69a",
-        "mainSeriesProperties.candleStyle.downColor": "#ef5350",
-      },
     });
 
     // Note: We use custom overlay markers instead of TradingView's API
@@ -101,10 +92,10 @@ export default function PairChart({
   }, [isScriptLoaded, expressionSymbol]);
 
   return (
-    <div className="relative">
+    <div className="relative h-full flex flex-col">
       {/* Custom Position Marker Overlay */}
       {entryRatio && (
-        <div className="absolute top-20 right-8 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 backdrop-blur-sm">
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 backdrop-blur-sm">
           <div className="relative flex items-center justify-center">
             {/* Pulsing effect */}
             <div className="absolute w-8 h-8 bg-emerald-500/30 rounded-full animate-ping" />
@@ -120,13 +111,13 @@ export default function PairChart({
         </div>
       )}
 
-      {/* Chart Container */}
-      <div className="h-[560px] rounded-xl border border-border/60 bg-[#0a0515] overflow-hidden">
-        <div ref={chartContainerRef} id="pair-tradingview-chart" className="w-full h-full" />
+      {/* Chart Container - Full Height with proper flex growth */}
+      <div className="flex-1 min-h-0 rounded-xl border border-[#1a1a1a] bg-[#080807] overflow-hidden">
+        <div ref={chartContainerRef} id="pair-tradingview-chart" className="w-full h-full min-h-0" />
       </div>
 
-      {/* Chart Description */}
-      <div className="mt-2 px-4 py-2 rounded-lg bg-background/20 backdrop-blur-sm border border-border/30">
+      {/* Chart Description - Fixed at bottom */}
+      <div className="mt-2 px-4 py-2 rounded-lg bg-[#0F110F] border border-[#1a1a1a] flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="text-xs text-foreground/60">
             Ratio Chart: <span className="text-foreground/80 font-medium">{longToken}/{shortToken}</span>

@@ -33,7 +33,7 @@ export function PairLogo({
 
   return (
     <div className={`
-      flex items-center gap-1.5
+      inline-flex items-center gap-1.5
       bg-gray-800/50 border border-gray-700 rounded-lg
       ${sizeClasses.padding}
       ${className}

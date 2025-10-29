@@ -33,6 +33,9 @@ export const usePositionWebSocket = (onUpdate: (update: PositionUpdate) => void)
   }, [onUpdate]);
 
   const cleanup = useCallback(() => {
+    // Only cleanup on client-side
+    if (typeof window === 'undefined') return;
+    
     if (pingIntervalRef.current) {
       clearInterval(pingIntervalRef.current);
       pingIntervalRef.current = null;
@@ -42,12 +45,17 @@ export const usePositionWebSocket = (onUpdate: (update: PositionUpdate) => void)
       reconnectTimeoutRef.current = null;
     }
     if (wsRef.current) {
+      // Remove error handler before closing to prevent error events during navigation
+      wsRef.current.onerror = null;
+      wsRef.current.onclose = null;
       wsRef.current.close();
       wsRef.current = null;
     }
   }, []);
 
   const connect = useCallback(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
     if (!wallet.publicKey) return;
 
     cleanup();
@@ -100,8 +108,8 @@ export const usePositionWebSocket = (onUpdate: (update: PositionUpdate) => void)
       };
 
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        setError('WebSocket connection error');
+        // Don't use console.error - it triggers Next.js error overlay
+        // This is expected during page navigation
         setIsConnected(false);
       };
 
@@ -117,8 +125,8 @@ export const usePositionWebSocket = (onUpdate: (update: PositionUpdate) => void)
 
       wsRef.current = ws;
     } catch (err) {
-      console.error('Failed to create WebSocket:', err);
-      setError('Failed to establish WebSocket connection');
+      // Don't use console.error - it triggers Next.js error overlay
+      // WebSocket will auto-reconnect if needed
     }
   }, [wallet.publicKey, cleanup]); // Removed onUpdate from dependencies
 

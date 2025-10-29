@@ -3,6 +3,8 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import toast, { Toaster } from 'react-hot-toast'
 
 interface ApiTradeData {
   id: number
@@ -123,6 +125,7 @@ const getTimeAgo = (timestamp: string): string => {
 }
 
 const Agent: React.FC = () => {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<"live" | "history">("live")
   const [searchQuery, setSearchQuery] = useState("")
   const [signals, setSignals] = useState<SignalData[]>([])
@@ -131,6 +134,9 @@ const Agent: React.FC = () => {
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [showMetricsModal, setShowMetricsModal] = useState(false)
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null)
+  
+  // Supported tokens
+  const SUPPORTED_TOKENS = ['BTC', 'SOL', 'ETH']
   
   // Filter states
   const [updateFilters, setUpdateFilters] = useState({
@@ -316,10 +322,52 @@ const Agent: React.FC = () => {
     return matchesSearch && matchesTab && matchesUpdateTime && matchesTimeframe
   })
 
+  // Handle opening position - check if pair is supported
+  const handleOpenPosition = (signal: SignalData) => {
+    const longSymbol = signal.token1.symbol
+    const shortSymbol = signal.token2.symbol
+    
+    // Check if both tokens are supported
+    const isSupported = SUPPORTED_TOKENS.includes(longSymbol) && SUPPORTED_TOKENS.includes(shortSymbol)
+    
+    if (isSupported) {
+      // Redirect to trade page with the pair
+      router.push(`/Trade?pair=${longSymbol}-${shortSymbol}`)
+    } else {
+      // Show purple-themed toast
+      toast.error('Token pair not supported', {
+        duration: 3000,
+        style: {
+          background: '#2a1a3a',
+          color: '#fff',
+          border: '1px solid #A855F7',
+          borderRadius: '0.75rem',
+          padding: '12px 16px',
+        },
+        iconTheme: {
+          primary: '#A855F7',
+          secondary: '#fff',
+        },
+      })
+    }
+  }
+
   return (
     <div className="w-full min-h-screen">
+      {/* Toast Container */}
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#2a1a3a',
+            color: '#fff',
+            border: '1px solid #A855F7',
+          },
+        }}
+      />
       {/* Header */}
-      <div className="max-w-4xl mx-auto px-4 pt-16 md:pt-24 pb-6 md:pb-8">
+      <div className="max-w-4xl mx-auto px-4 pt-4 md:pt-8 pb-6 md:pb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30 overflow-hidden">
@@ -334,7 +382,7 @@ const Agent: React.FC = () => {
           </div>
           <button 
             onClick={() => setShowMetricsModal(true)}
-            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold text-sm hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-shrink-0 px-4 py-2 rounded-lg bg-purple-600/10 border border-purple-600/30 text-purple-400 font-semibold text-sm hover:bg-purple-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 20V10M12 20V4M6 20v-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -430,7 +478,7 @@ const Agent: React.FC = () => {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="w-full bg-[#121512] rounded-2xl flex flex-col p-3 gap-3 border border-transparent animate-pulse"
+                className="w-full bg-black/40 backdrop-blur-sm rounded-xl flex flex-col p-6 gap-3 border border-gray-800/50 animate-pulse"
               >
                 {/* Header Skeleton */}
                 <div className="flex flex-row justify-between items-center w-full">
@@ -473,7 +521,7 @@ const Agent: React.FC = () => {
             {filteredSignals.map((signal) => (
             <div
               key={signal.id}
-              className="group w-full bg-gradient-to-br from-gray-900 to-black backdrop-blur-md cursor-pointer rounded-2xl flex flex-col p-3 gap-3 border border-purple-600/40 hover:border-purple-600/60 shadow-xl shadow-purple-900/20 hover:shadow-2xl hover:shadow-purple-900/30 transition-all"
+              className="group w-full bg-black/40 backdrop-blur-sm cursor-pointer rounded-xl flex flex-col p-6 gap-3 border border-gray-800/50 hover:border-purple-600/30 transition-all"
             >
               {/* Header */}
               <div className="flex flex-col gap-3">
@@ -542,7 +590,10 @@ const Agent: React.FC = () => {
               </div>
 
               {/* Action Button */}
-              <button className="w-full py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-purple-500/50 cursor-pointer">
+              <button 
+                onClick={() => handleOpenPosition(signal)}
+                className="w-full py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-purple-500/50 cursor-pointer"
+              >
                 Open Position
               </button>
           </div>
@@ -773,134 +824,60 @@ const Agent: React.FC = () => {
             {/* Metrics */}
             <div className="flex flex-col p-3 sm:p-4 mt-3 bg-[#151815] rounded-lg gap-2">
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Total trades</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Total trades</span>
                 <span className="text-white text-[10px] sm:text-xs font-semibold">{performanceMetrics.totalTrades}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Open trades</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Open trades</span>
                 <span className="text-white text-[10px] sm:text-xs font-semibold">{performanceMetrics.openTrades}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Closed trades</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Closed trades</span>
                 <span className="text-white text-[10px] sm:text-xs font-semibold">{performanceMetrics.closedTrades}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Winning trades</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Winning trades</span>
                 <span className="text-green-400 text-[10px] sm:text-xs font-semibold">{performanceMetrics.winningTrades}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Losing trades</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Losing trades</span>
                 <span className="text-red-400 text-[10px] sm:text-xs font-semibold">{performanceMetrics.losingTrades}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Win rate</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Win rate</span>
                 <span className="text-white text-[10px] sm:text-xs font-semibold">
                   {performanceMetrics.winRate != null ? `${(Number(performanceMetrics.winRate) * 100).toFixed(2)}%` : 'N/A'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Total Return (no leverage)</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Total Return (no leverage)</span>
                 <span className={`text-[10px] sm:text-xs font-semibold ${performanceMetrics.totalReturnWithoutLeverage >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {performanceMetrics.totalReturnWithoutLeverage != null ? `${Number(performanceMetrics.totalReturnWithoutLeverage).toFixed(4)}%` : 'N/A'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Total Return (10x leverage)</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Total Return (2x leverage)</span>
                 <span className={`text-[10px] sm:text-xs font-semibold ${performanceMetrics.totalReturnWithLeverage >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {performanceMetrics.totalReturnWithLeverage != null ? `${Number(performanceMetrics.totalReturnWithLeverage).toFixed(4)}%` : 'N/A'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Estimated APY (no leverage)</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
-                <span className={`text-[10px] sm:text-xs font-semibold ${performanceMetrics.apy && performanceMetrics.apy >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {performanceMetrics.apy != null ? `${Number(performanceMetrics.apy).toFixed(2)}%` : 'N/A'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Estimated APY (10x leverage)</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
-                <span className={`text-[10px] sm:text-xs font-semibold ${performanceMetrics.apyLeveraged && performanceMetrics.apyLeveraged >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {performanceMetrics.apyLeveraged != null ? `${Number(performanceMetrics.apyLeveraged).toFixed(2)}%` : 'N/A'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Profit Factor</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Profit Factor</span>
                 <span className="text-white text-[10px] sm:text-xs font-semibold">
                   {performanceMetrics.profitFactor != null ? Number(performanceMetrics.profitFactor).toFixed(2) : 'N/A'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex flex-row gap-1">
-                  <span className="text-[#A0A0A0] text-[10px] sm:text-xs flex items-center gap-1">Average Duration</span>
-                  <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 256 256" className="inline w-3 h-3" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"></path>
-                  </svg>
-                </div>
+                <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Average Duration</span>
                 <span className="text-white text-[10px] sm:text-xs font-semibold">
                   {performanceMetrics.avgDuration != null
                     ? (performanceMetrics.avgDuration >= 1 

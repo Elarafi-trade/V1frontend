@@ -62,9 +62,9 @@ export function PositionRow({ position, onClose, loading = false }: PositionRowP
     : 'text-gray-500';
 
   return (
-    <tr className="border-b border-gray-800 hover:bg-gray-900/50 transition-colors">
+    <tr className="border-b border-[#1a1a1a] hover:bg-[#1C221C] transition-colors">
       {/* Pair */}
-      <td className="p-3">
+      <td className="p-2">
         <PairLogo 
           longSymbol={position.longMarketSymbol}
           shortSymbol={position.shortMarketSymbol}
@@ -72,33 +72,33 @@ export function PositionRow({ position, onClose, loading = false }: PositionRowP
       </td>
       
       {/* Size */}
-      <td className="text-right p-3 font-medium text-gray-200">
+      <td className="text-right p-2 font-medium text-white text-xs">
         {formatCurrency(position.capitalUSDC, 0)}
       </td>
       
       {/* Entry Price (Ratio) */}
-      <td className="text-right p-3 text-gray-300">
+      <td className="text-right p-2 text-[#717171] text-xs">
         {formatNumber(position.entryRatio, 6)}
       </td>
       
       {/* Mark Price (Current Ratio) */}
-      <td className="text-right p-3 font-medium text-gray-200">
+      <td className="text-right p-2 font-medium text-white text-xs">
         {position.currentRatio 
           ? formatNumber(position.currentRatio, 6)
-          : <span className="text-gray-500">-</span>
+          : <span className="text-[#717171]">-</span>
         }
       </td>
       
       {/* P&L */}
-      <td className="text-right p-3">
+      <td className="text-right p-2">
         <div className={pnlColor}>
-          <div className="font-semibold">
+          <div className="font-semibold text-xs">
             {position.unrealizedPnLPercent !== undefined
               ? formatPercent(position.unrealizedPnLPercent)
               : '-'
             }
           </div>
-          <div className="text-sm opacity-80">
+          <div className="text-[10px] opacity-80">
             {position.unrealizedPnL !== undefined
               ? `${position.unrealizedPnL >= 0 ? '+' : ''}${formatCurrency(position.unrealizedPnL)}`
               : '-'
@@ -108,33 +108,33 @@ export function PositionRow({ position, onClose, loading = false }: PositionRowP
       </td>
       
       {/* Margin */}
-      <td className="text-right p-3 text-gray-300">
+      <td className="text-right p-2 text-[#717171] text-xs">
         {formatCurrency(margin)}
       </td>
       
       {/* Liq Price */}
-      <td className="text-right p-3">
-        <div className="text-yellow-500 font-medium">
+      <td className="text-right p-2">
+        <div className="text-yellow-400 font-medium text-xs">
           {formatNumber(liqPrice, 2)}
         </div>
         {health !== undefined && (
-          <div className={`text-xs ${healthColor}`}>
-            {health.toFixed(0)}% health
+          <div className={`text-[10px] ${healthColor}`}>
+            {health.toFixed(0)}%
           </div>
         )}
       </td>
       
       {/* TP/SL */}
-      <td className="text-center p-3">
+      <td className="text-center p-2">
         {(position.takeProfitPercent !== null && position.takeProfitPercent !== undefined) || 
          (position.stopLossPercent !== null && position.stopLossPercent !== undefined) ? (
-          <div className="text-sm space-y-0.5">
-            <div className="text-green-500">
+          <div className="text-[10px] space-y-0.5">
+            <div className="text-green-400">
               {(position.takeProfitPercent !== null && position.takeProfitPercent !== undefined)
                 ? `+${position.takeProfitPercent}%` 
                 : '-'}
             </div>
-            <div className="text-red-500">
+            <div className="text-red-400">
               {(position.stopLossPercent !== null && position.stopLossPercent !== undefined)
                 ? `-${position.stopLossPercent}%` 
                 : '-'}
@@ -146,11 +146,11 @@ export function PositionRow({ position, onClose, loading = false }: PositionRowP
       </td>
       
       {/* Actions */}
-      <td className="text-center p-3">
+      <td className="text-center p-2">
         <button
           onClick={onClose}
           disabled={loading}
-          className="px-4 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-sm font-medium transition-colors"
+          className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 disabled:bg-[#1a1a1a] disabled:cursor-not-allowed disabled:text-[#717171] rounded text-red-400 text-xs font-semibold transition-colors border border-red-500/30"
         >
           {loading ? 'Closing...' : 'Close'}
         </button>

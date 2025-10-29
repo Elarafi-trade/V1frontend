@@ -29,6 +29,9 @@ export default function CryptoChart() {
 
   // Load TradingView script only once
   useEffect(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
+    
     // Check if script is already loaded
     if (window.TradingView) {
       setIsScriptLoaded(true);
@@ -55,6 +58,8 @@ export default function CryptoChart() {
 
   // Initialize or update the TradingView widget
   useEffect(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return;
     if (!isScriptLoaded || !chartContainerRef.current) return;
 
     // Clear previous widget if it exists

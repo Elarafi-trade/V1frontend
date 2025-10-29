@@ -50,9 +50,9 @@ export function TradeHistoryRow({ trade }: TradeHistoryRowProps) {
   const shortPriceChange = ((trade.closeShortPrice - trade.entryShortPrice) / trade.entryShortPrice) * 100;
 
   return (
-    <tr className="border-b border-gray-800 hover:bg-gray-900/50 transition-colors">
+    <tr className="border-b border-[#1a1a1a] hover:bg-[#080807]/50 transition-colors">
       {/* Market (Pair) */}
-      <td className="p-3">
+      <td className="p-2 text-left">
         <PairLogo 
           longSymbol={trade.longMarketSymbol}
           shortSymbol={trade.shortMarketSymbol}
@@ -61,45 +61,45 @@ export function TradeHistoryRow({ trade }: TradeHistoryRowProps) {
       </td>
       
       {/* Time */}
-      <td className="p-3 text-gray-400 text-sm">
+      <td className="p-2 text-left text-[#717171] text-xs">
         {formatRelativeTime(trade.closeTimestamp)}
       </td>
       
       {/* P&L */}
-      <td className="p-3">
-        <div className={`font-semibold ${pnlColor}`}>
+      <td className="p-2 text-right">
+        <div className={`text-xs font-semibold ${pnlColor}`}>
           {isProfitable ? '+' : ''}{formatCurrency(trade.realizedPnL)}
         </div>
-        <div className={`text-xs ${pnlColor}`}>
-          {isProfitable ? '+' : ''}{formatPercent(trade.realizedPnLPercent)}
+        <div className={`text-[10px] ${pnlColor}`}>
+          {formatPercent(trade.realizedPnLPercent)}
         </div>
       </td>
       
       {/* Size */}
-      <td className="p-3 text-gray-200 text-sm">
-        <div>{formatNumber(longSize, 2)} {trade.longMarketSymbol}</div>
-        <div className="text-gray-400 text-xs">{formatNumber(shortSize, 2)} {trade.shortMarketSymbol}</div>
+      <td className="p-2 text-right text-xs">
+        <div className="text-white">{formatNumber(longSize, 2)} {trade.longMarketSymbol}</div>
+        <div className="text-[#717171] text-[10px]">{formatNumber(shortSize, 2)} {trade.shortMarketSymbol}</div>
       </td>
       
       {/* Entry Price */}
-      <td className="p-3 text-gray-200 text-sm">
-        <div>{formatCurrency(trade.entryLongPrice)}</div>
-        <div className="text-gray-400 text-xs">{formatCurrency(trade.entryShortPrice)}</div>
+      <td className="p-2 text-right text-xs">
+        <div className="text-white">{formatCurrency(trade.entryLongPrice)}</div>
+        <div className="text-[#717171] text-[10px]">{formatCurrency(trade.entryShortPrice)}</div>
       </td>
       
       {/* Exit Price */}
-      <td className="p-3 text-gray-200 text-sm">
-        <div>{formatCurrency(trade.closeLongPrice)}</div>
-        <div className="text-gray-400 text-xs">{formatCurrency(trade.closeShortPrice)}</div>
+      <td className="p-2 text-right text-xs">
+        <div className="text-white">{formatCurrency(trade.closeLongPrice)}</div>
+        <div className="text-[#717171] text-[10px]">{formatCurrency(trade.closeShortPrice)}</div>
       </td>
       
       {/* Price % Change */}
-      <td className="p-3 text-sm">
+      <td className="p-2 text-right text-xs">
         <div className={longPriceChange >= 0 ? 'text-green-500' : 'text-red-500'}>
-          {longPriceChange >= 0 ? '+' : ''}{formatPercent(longPriceChange)}
+          {formatPercent(longPriceChange)}
         </div>
-        <div className={`text-xs ${shortPriceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-          {shortPriceChange >= 0 ? '+' : ''}{formatPercent(shortPriceChange)}
+        <div className={`text-[10px] ${shortPriceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          {formatPercent(shortPriceChange)}
         </div>
       </td>
     </tr>

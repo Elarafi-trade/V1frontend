@@ -42,6 +42,7 @@
     "postprocessing": "^6.37.8",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-hot-toast": "^2.6.0",
     "recharts": "^3.3.0",
     "redis": "^5.9.0",
     "tailwind-merge": "^3.3.1",

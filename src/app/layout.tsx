@@ -36,7 +36,7 @@ export default function RootLayout({
           </div>
           
           {/* Main content with padding to account for fixed navbar */}
-          <main className="pt-16">
+          <main className="pt-[40px]">
             {children}
           </main>
         </Providers>
