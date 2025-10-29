@@ -18,7 +18,8 @@
   },
   "include": [
     "src/workers/**/*",
-    "src/lib/**/*"
+    "src/lib/**/*",
+    "src/services/**/*"
   ],
   "exclude": [
     "node_modules",
