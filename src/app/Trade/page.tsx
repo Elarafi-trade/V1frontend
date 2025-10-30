@@ -662,6 +662,11 @@ function Trade() {
                       min="0"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
+                      style={{
+                        MozAppearance: 'textfield',
+                        WebkitAppearance: 'none',
+                        appearance: 'none'
+                      }}
                       className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       placeholder="0"
                     />
@@ -698,6 +703,11 @@ function Trade() {
                       value={takeProfitPercent}
                       onChange={(e) => setTakeProfitPercent(e.target.value)}
                       placeholder="e.g., 10"
+                      style={{
+                        MozAppearance: 'textfield',
+                        WebkitAppearance: 'none',
+                        appearance: 'none'
+                      }}
                       className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
@@ -708,6 +718,11 @@ function Trade() {
                       value={stopLossPercent}
                       onChange={(e) => setStopLossPercent(e.target.value)}
                       placeholder="e.g., 5"
+                      style={{
+                        MozAppearance: 'textfield',
+                        WebkitAppearance: 'none',
+                        appearance: 'none'
+                      }}
                       className="w-full rounded-xl bg-background/40 border border-border px-3 py-2 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>

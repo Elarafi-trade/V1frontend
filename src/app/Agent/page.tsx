@@ -374,7 +374,7 @@ const Agent: React.FC = () => {
               <Image src="/AgentLogo.png" alt="Agent Pear" width={48} height={48} className="w-full h-full object-cover" />
             </div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">Agent Pear</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">Agent Elara</h1>
               <span className="px-2 sm:px-2.5 py-1 bg-purple-600/20 border border-purple-600/40 rounded-md text-purple-400 text-xs font-semibold">
                 v1.0
               </span>
@@ -851,7 +851,7 @@ const Agent: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-[#A0A0A0] text-[10px] sm:text-xs">Win rate</span>
                 <span className="text-white text-[10px] sm:text-xs font-semibold">
-                  {performanceMetrics.winRate != null ? `${(Number(performanceMetrics.winRate) * 100).toFixed(2)}%` : 'N/A'}
+                  {performanceMetrics.winRate != null ? `${Number(performanceMetrics.winRate).toFixed(2)}%` : 'N/A'}
                 </span>
               </div>
 

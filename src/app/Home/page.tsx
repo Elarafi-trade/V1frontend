@@ -9,6 +9,7 @@ import ElectricBorder from "@/components/ElectricBorder"
 import TiltedCard from "@/components/TiltedCard"
 // import ProfileCard from '@/components/ProfileCard';
 import LogoLoop from "@/components/LogoLoop"
+import { Footer } from "@/components/Footer"
 
 const Home: React.FC = () => {
   // Dynamic metrics state
@@ -405,12 +406,12 @@ const Home: React.FC = () => {
                     AI-Powered trading signal bot, watching over market conditions 24/7 and suggests high-probability entries based on mean reversion and correlation breakdowns between pairs.
                   </p>
 
-                  <button className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs sm:text-sm hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 w-fit">
+                  <a href="/Agent" className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold text-xs sm:text-sm hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 w-fit cursor-pointer">
                     Get Signals
-                  </button>
+                  </a>
 
                   {/* Stats */}
-                  <div className="grid grid-cols-3 gap-4 sm:gap-8 pt-4">
+                  <div className="grid grid-cols-3 gap-4 sm:gap-8 pt-4 mt-4">
                     <div>
                       <div className="text-2xl sm:text-3xl font-bold text-white mb-0.5">68.96%</div>
                       <div className="text-[10px] sm:text-xs text-gray-500">Win Rate</div>
@@ -884,126 +885,53 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Footer Section */}
-          <footer className="mt-24 sm:mt-32 md:mt-48 border-t border-gray-800">
-            <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 md:py-16">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 md:gap-12 mb-8 sm:mb-10 md:mb-12">
-                {/* Logo and Tagline */}
-                <div className="col-span-2 sm:col-span-3 lg:col-span-1 mb-4 lg:mb-0">
-                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                    <div className="text-green-500 text-xl sm:text-2xl">
-         
-        </div>
-                    <span className="text-purple-500 text-xl sm:text-2xl font-bold">ElaraFi</span>
-                  </div>
-                  <p className="text-gray-400 text-xs sm:text-sm">The Home of Pair Trading.</p>
-                </div>
+          {/* Footer */}
+          <Footer
+            logo={<Image src="/ElaraFiLogo.png" alt="ElaraFi Logo" width={32} height={32} className="w-8 h-8" />}
+            brandName="ElaraFi"
+            socialLinks={[
+              {
+                icon: (
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                ),
+                href: "https://x.com/ElarafiTrade",
+                label: "Twitter"
+              },
+              {
+                icon: (
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                  </svg>
+                ),
+                href: "https://t.me/Elara_pair_agent_bot",
+                label: "Telegram"
+              },
+              {
+                icon: (
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                ),
+                href: "https://www.youtube.com/channel/UCKXQEwHNiaaxerhZv990cMA",
+                label: "YouTube"
+              }
+            ]}
+            mainLinks={[
+              { href: "/Trade", label: "Trade" },
+              { href: "/Agent", label: "Agent Elara" },
+              { href: "#", label: "Docs" },
+              { href: "#", label: "Blog" }
+            ]}
+            legalLinks={[
+              { href: "#", label: "Terms of Use" }
+            ]}
+            copyright={{
+              text: "© 2025 ElaraFi Protocol. All rights reserved."
+            }}
+          />
 
-                {/* Column 1 - Legal */}
-                <div>
-                  <ul className="space-y-2 sm:space-y-3">
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Terms Of Use
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Privacy Policy
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Disclaimer
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Column 2 - Resources */}
-                <div>
-                  <ul className="space-y-2 sm:space-y-3">
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Docs
-                      </a>
-                    </li>
-                    
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Stats
-                      </a>
-                    </li>
-
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Blog
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Column 3 - Learn */}
-                <div>
-                  <ul className="space-y-2 sm:space-y-3">
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Education
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Agent Elara
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        FAQ
-                      </a>
-                    </li>
-                  
-                  </ul>
-                </div>
-
-                {/* Column 4 - Community */}
-                <div>
-                  <ul className="space-y-2 sm:space-y-3">
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Twitter (x)
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Discord
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Snapshot
-                      </a>
-                    </li>
-                   
-                  </ul>
-                </div>
-              </div>
-
-              {/* Bottom Bar */}
-              <div className="pt-6 sm:pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
-                {/* System Status */}
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span className="text-gray-400 text-xs sm:text-sm">All systems operational</span>
-                </div>
-
-                {/* Copyright */}
-                <div className="text-gray-400 text-xs sm:text-sm text-center">
-                  © 2025 Pear Protocol. All rights reserved.
-                </div>
-              </div>
-            </div>
-          </footer>
-         
         </div>
       </div>
     </div>
