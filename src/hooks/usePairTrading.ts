@@ -316,73 +316,106 @@ export const usePairTrading = () => {
           }
         }
 
-        // Two-prompt taker flow: PURE MARKET ORDERS (EXACTLY like trading_bot_v1)
-        async function sendMarketTaker(
-          marketIndex: number,
-          direction: PositionDirection,
-          amount: number,  // Pass as NUMBER (like trading bot), not BN!
-        ): Promise<string> {
-          // Get fresh oracle price for logging only
-          const freshOracle = driftClient.getOracleDataForPerpMarket(marketIndex).price.toNumber() / 1e6;
-          console.log(`   Fresh oracle for market ${marketIndex}: $${freshOracle.toFixed(2)}`);
-          console.log(`   Placing MARKET order: ${direction === PositionDirection.LONG ? 'LONG' : 'SHORT'} ${amount.toFixed(4)} @ market`);
+        // Combined transaction: Both LONG and SHORT in ONE signature
+        console.log('\n🎯 Creating COMBINED transaction for LONG + SHORT...');
 
-          // Convert to perp precision using SDK method (EXACTLY like trading_bot_v1)
-          const baseAssetAmount = driftClient.convertToPerpPrecision(amount);
-          
-          console.log(`   Converted ${amount} to baseAssetAmount: ${baseAssetAmount.toString()}`);
+        // Convert amounts to perp precision
+        const longBaseAssetAmountBN = driftClient.convertToPerpPrecision(longQty);
+        const shortBaseAssetAmountBN = driftClient.convertToPerpPrecision(shortQty);
 
-          // Use getOrderParams helper (EXACTLY like trading_bot_v1)
-          const orderParams = getOrderParams({
-            orderType: OrderType.MARKET,
-            marketType: MarketType.PERP,
-            marketIndex: marketIndex,
-            direction: direction,
-            baseAssetAmount: baseAssetAmount,  // Now using SDK-converted BN
-            reduceOnly: false,
-          });
+        console.log(`   LONG: ${longQty.toFixed(4)} ${params.longToken} (${longBaseAssetAmountBN.toString()} base units)`);
+        console.log(`   SHORT: ${shortQty.toFixed(4)} ${params.shortToken} (${shortBaseAssetAmountBN.toString()} base units)`);
 
-          console.log(`   Order params:`, {
-            orderType: orderParams.orderType,
-            marketIndex: orderParams.marketIndex,
-            direction: orderParams.direction,
-            baseAssetAmount: orderParams.baseAssetAmount.toString(),
-          });
+        // Get order params for both legs
+        const longOrderParams = getOrderParams({
+          orderType: OrderType.MARKET,
+          marketType: MarketType.PERP,
+          marketIndex: longMarket.marketIndex,
+          direction: PositionDirection.LONG,
+          baseAssetAmount: longBaseAssetAmountBN,
+          reduceOnly: false,
+        });
 
-          // Place order using SDK
-          const txSig = await driftClient.placePerpOrder(orderParams);
+        const shortOrderParams = getOrderParams({
+          orderType: OrderType.MARKET,
+          marketType: MarketType.PERP,
+          marketIndex: shortMarket.marketIndex,
+          direction: PositionDirection.SHORT,
+          baseAssetAmount: shortBaseAssetAmountBN,
+          reduceOnly: false,
+        });
 
-          console.log(`   ✅ Order placed: ${txSig.slice(0, 8)}...`);
-          
-          // Wait for confirmation
-          await connection.confirmTransaction(txSig, 'confirmed');
-          
-          console.log(`   ✅ Transaction confirmed!`);
+        // Get instructions for both orders
+        const longOrderIx = await driftClient.getPlacePerpOrderIx(longOrderParams);
+        const shortOrderIx = await driftClient.getPlacePerpOrderIx(shortOrderParams);
 
-          return txSig;
+        // Create single transaction with both instructions
+        const transaction = new Transaction();
+        
+        // Add compute budget for complex transaction
+        const computeUnits = 400_000; // Increased for two orders
+        const computeBudgetIx = ComputeBudgetProgram.setComputeUnitLimit({
+          units: computeUnits,
+        });
+        transaction.add(computeBudgetIx);
+        
+        // Add both order instructions
+        transaction.add(longOrderIx);
+        transaction.add(shortOrderIx);
+
+        console.log('📝 Transaction created with 2 order instructions');
+        console.log('✍️  Requesting signature and sending...');
+
+        // Use wallet adapter's sendTransaction (handles signing + sending in one step)
+        // This prevents double-submission issues
+        let txSig: string;
+        try {
+          if (wallet.sendTransaction) {
+            // Modern wallet adapter - use sendTransaction
+            txSig = await wallet.sendTransaction(transaction, connection, {
+              skipPreflight: true, // Skip simulation to avoid "already processed" errors
+              preflightCommitment: 'confirmed',
+              maxRetries: 3,
+            });
+          } else {
+            // Fallback: manual sign and send
+            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+            transaction.recentBlockhash = blockhash;
+            transaction.feePayer = wallet.publicKey;
+            
+            const signedTx = await wallet.signTransaction!(transaction);
+            
+            txSig = await connection.sendRawTransaction(signedTx.serialize(), {
+              skipPreflight: true, // Skip preflight to avoid double submission
+              maxRetries: 0, // Don't retry on this level
+            });
+            
+            // Confirm manually
+            await connection.confirmTransaction({
+              signature: txSig,
+              blockhash,
+              lastValidBlockHeight,
+            }, 'confirmed');
+          }
+        } catch (err: any) {
+          // Better error handling for common issues
+          if (err.message?.includes('already been processed')) {
+            console.warn('⚠️ Transaction already processed, this might be a duplicate submission');
+            throw new Error('Transaction already submitted. Please wait a moment and check your positions.');
+          }
+          throw err;
         }
 
+        console.log(`✅ Combined transaction sent: ${txSig}`);
+        console.log('⏳ Waiting for confirmation...');
 
-        // Place LONG first, then SHORT
-        console.log('\n🎯 Sending LONG MARKET order FIRST...');
-        const longTxSig = await sendMarketTaker(
-          longMarket.marketIndex,
-          PositionDirection.LONG,
-          longQty  // Pass as number (trading bot style)
-        );
-        console.log(`✅ LONG MARKET order placed: ${longTxSig}`);
+        // Ensure transaction is confirmed
+        await connection.confirmTransaction(txSig, 'confirmed');
+
+        console.log('✅ Transaction confirmed! Both orders placed in single signature');
         
-        // Wait 3 seconds for LONG to fill before placing SHORT
-        console.log('⏳ Waiting 3s for LONG to fill before SHORT leg...');
-        await new Promise(r => setTimeout(r, 3000));
-
-        console.log('\n🎯 Sending SHORT MARKET order...');
-        const shortTxSig = await sendMarketTaker(
-          shortMarket.marketIndex,
-          PositionDirection.SHORT,
-          shortQty  // Pass as number (trading bot style)
-        );
-        console.log(`✅ SHORT MARKET order placed: ${shortTxSig}`);
+        const longTxSig = txSig; // Same signature for both
+        const shortTxSig = txSig; // Same signature for both
 
         // Wait for orders to fill and settle on-chain (devnet can be VERY slow)
         console.log('\n⏳ Waiting 10s for orders to fill and settle on devnet...');

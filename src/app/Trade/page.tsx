@@ -49,7 +49,7 @@ const TokenLogo = ({ token, size = 20 }: { token: string; size?: number }) => {
 
 function Trade() {
   const wallet = useWallet();
-  const { openPairTrade, loading, error } = usePairTrading();
+  const { openPairTrade, loading, error, isProcessing } = usePairTrading();
   const { availableTokens, loading: marketsLoading, error: marketsError } = useDriftMarkets();
   const { analysis, loading: agentLoading, error: agentError, fetchAnalysis } = useAgentAnalysis();
   const searchParams = useSearchParams();
@@ -141,8 +141,8 @@ function Trade() {
   };
 
   const handleOpenPosition = async () => {
-    // Prevent double-clicking
-    if (loading) {
+    // Prevent double-clicking and duplicate transactions
+    if (loading || isProcessing) {
       console.log('⚠️ Transaction already in progress, please wait...');
       return;
     }
@@ -842,10 +842,10 @@ function Trade() {
 
                 <button 
                   onClick={handleOpenPosition}
-                  disabled={loading || !wallet.connected || marketsLoading || availableTokens.length === 0}
+                  disabled={loading || isProcessing || !wallet.connected || marketsLoading || availableTokens.length === 0}
                   className="mt-6 w-full rounded-full bg-purple-600 text-white hover:bg-purple-500 transition-colors text-sm font-semibold py-3 shadow disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading 
+                  {(loading || isProcessing)
                     ? 'Opening Position...' 
                     : !wallet.connected 
                     ? 'Connect Wallet First' 
