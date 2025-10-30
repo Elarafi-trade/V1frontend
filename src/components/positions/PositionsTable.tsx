@@ -55,7 +55,7 @@ export function PositionsTable({
         <button 
           onClick={onCloseAll}
           disabled={loading}
-          className="px-3 py-1.5 bg-[#A2DB5C] hover:bg-[#8cc745] disabled:bg-[#1a1a1a] disabled:cursor-not-allowed disabled:text-[#717171] rounded-lg text-black font-semibold text-xs transition-colors"
+          className="px-3 py-1.5 rounded-lg bg-purple-600 text-white font-semibold text-xs hover:bg-purple-500 border border-purple-600/50 disabled:bg-purple-900 disabled:text-purple-300/60 disabled:border-purple-800 disabled:cursor-not-allowed transition-colors"
         >
           Close All ({positions.length})
         </button>

@@ -101,7 +101,7 @@ export default function DepositWithdrawModal({ isOpen, onClose, defaultTab = 'de
             onClick={() => setActiveTab('deposit')}
             className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
               activeTab === 'deposit'
-                ? 'text-emerald-400 border-b-2 border-emerald-400'
+                ? 'text-purple-400 border-b-2 border-purple-400'
                 : 'text-foreground/60 hover:text-foreground'
             }`}
           >
@@ -128,7 +128,7 @@ export default function DepositWithdrawModal({ isOpen, onClose, defaultTab = 'de
         {/* Content */}
         <div className="p-6">
           {/* Balance Info */}
-          {balance && (
+            {balance && (
             <div className="mb-6 p-4 rounded-lg bg-background/40 border border-border/40">
               <div className="grid grid-cols-2 gap-4 text-sm mb-3">
                 <div>
@@ -137,7 +137,7 @@ export default function DepositWithdrawModal({ isOpen, onClose, defaultTab = 'de
                 </div>
                 <div>
                   <div className="text-foreground/60">Free Collateral</div>
-                  <div className="text-lg font-semibold text-emerald-400">${balance.freeCollateral.toFixed(2)}</div>
+                    <div className="text-lg font-semibold text-purple-400">${balance.freeCollateral.toFixed(2)}</div>
                 </div>
               </div>
               {balance.usedMargin > 0 && (
@@ -151,18 +151,7 @@ export default function DepositWithdrawModal({ isOpen, onClose, defaultTab = 'de
             </div>
           )}
           
-          {/* SOL Collateral Weight Warning */}
-          {activeTab === 'deposit' && (
-            <div className="mb-4 p-3 rounded-lg bg-yellow-900/20 border border-yellow-500/30">
-              <div className="flex gap-2 items-start">
-                <div className="text-yellow-400 text-lg">⚠️</div>
-                <div className="text-xs text-yellow-200/90">
-                  <div className="font-semibold mb-1">SOL Collateral Weight (~29%)</div>
-                  <div>Drift Protocol (devnet) values SOL at only ~29% of market price as collateral. This means 1 SOL at $200 = ~$58 usable collateral. Your actual usable collateral will be significantly lower than the SOL market value.</div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Removed legacy SOL collateral weight warning */}
 
           {/* Input */}
           <div>
@@ -257,19 +246,11 @@ export default function DepositWithdrawModal({ isOpen, onClose, defaultTab = 'de
           <button
             onClick={activeTab === 'deposit' ? handleDeposit : handleWithdraw}
             disabled={loading || !amount}
-            className={`mt-6 w-full px-6 py-3 rounded-lg font-semibold transition-colors ${
-              activeTab === 'deposit'
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                : 'bg-purple-600 hover:bg-purple-500 text-white'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`mt-6 w-full px-6 py-3 rounded-lg font-semibold transition-colors bg-purple-600 hover:bg-purple-500 text-white disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {loading
-              ? activeTab === 'deposit'
-                ? 'Depositing...'
-                : 'Withdrawing...'
-              : activeTab === 'deposit'
-              ? `Deposit ${amount || '0'} SOL`
-              : `Withdraw ${amount || '0'} SOL`}
+              ? activeTab === 'deposit' ? 'Depositing...' : 'Withdrawing...'
+              : activeTab === 'deposit' ? `Deposit ${amount || '0'} SOL` : `Withdraw ${amount || '0'} SOL`}
           </button>
 
           {/* Help Text */}

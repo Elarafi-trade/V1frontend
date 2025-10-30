@@ -25,8 +25,8 @@ export function NavBar({ items, className }: { items: NavItem[]; className?: str
   }, []);
 
   return (
-    <nav className={cn("fixed top-0 left-0 right-0 z-50 w-full bg-[#0F110F] border-b border-transparent px-4 py-1.5 transition-all duration-300 ease-in-out", className)}>
-      <div className="flex items-center justify-between w-full">
+    <nav className={cn("fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-xl bg-black/30 supports-[backdrop-filter]:bg-black/30 border-b border-white/10 px-6 md:px-8 lg:px-8 py-1.5 transition-all duration-300 ease-in-out", className)}>
+      <div className="flex items-center justify-between w-full gap-8">
         {/* Left: Logo + Nav Links */}
         <div className="flex items-center gap-16">
           {/* Logo */}
@@ -62,15 +62,9 @@ export function NavBar({ items, className }: { items: NavItem[]; className?: str
           </nav>
         </div>
 
-        {/* Right: Search + Wallet + Icons */}
+        {/* Right: Wallet + Icons */}
         <div className="flex items-center gap-2">
-          {/* Search Pair Button */}
-          <div className="hidden min-[744px]:flex items-center gap-2 p-2 bg-[#2a1a3a] hover:bg-[#3a2450] rounded-lg cursor-pointer">
-            <div className="text-xs font-semibold text-white rounded bg-[#A855F7] w-[25px] h-[25px] flex items-center justify-center">
-              /
-            </div>
-            <div className="text-white/70 text-xs font-semibold pr-2">Search Pair</div>
-          </div>
+          
 
           {/* Wallet Button - purple style */}
           {mounted && (
@@ -108,7 +102,7 @@ export function NavBar({ items, className }: { items: NavItem[]; className?: str
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-[#0F110F] border-t border-[#1a1a1a] shadow-lg min-[1140px]:hidden">
+        <div className="absolute top-full left-0 right-0 backdrop-blur-xl bg-black/40 supports-[backdrop-filter]:bg-black/40 border-t border-white/10 shadow-lg min-[1140px]:hidden">
           <div className="px-4 py-3">
             {items.map((item: NavItem) => {
               const isActive = pathname === item.url;

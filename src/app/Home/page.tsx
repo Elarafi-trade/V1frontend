@@ -68,7 +68,7 @@ const Home: React.FC = () => {
   return (
     <div className="w-full">
       {/* Hero Section with Hyperspeed Background */}
-      <div className="relative w-full h-screen overflow-hidden -mt-16">
+      <div className="relative w-full h-[calc(100vh-40px)] overflow-hidden">
         {/* Hyperspeed background - full screen */}
         <div className="absolute inset-0 w-full h-full">
           <Hyperspeed
@@ -928,19 +928,16 @@ const Home: React.FC = () => {
                         Docs
                       </a>
                     </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Pear API
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Pear Token
-                      </a>
-                    </li>
+                    
                     <li>
                       <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
                         Stats
+                      </a>
+                    </li>
+
+                    <li>
+                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
+                        Blog
                       </a>
                     </li>
                   </ul>
@@ -956,7 +953,7 @@ const Home: React.FC = () => {
                     </li>
                     <li>
                       <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Agent Pear
+                        Agent Elara
                       </a>
                     </li>
                     <li>
@@ -964,11 +961,7 @@ const Home: React.FC = () => {
                         FAQ
                       </a>
                     </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Brand Assets
-                      </a>
-                    </li>
+                  
                   </ul>
                 </div>
 
@@ -990,11 +983,7 @@ const Home: React.FC = () => {
                         Snapshot
                       </a>
                     </li>
-                    <li>
-                      <a href="#" className="text-gray-400 hover:text-white transition-colors text-xs sm:text-sm">
-                        Blog
-                      </a>
-                    </li>
+                   
                   </ul>
                 </div>
               </div>

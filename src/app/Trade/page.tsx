@@ -481,7 +481,7 @@ function Trade() {
       <div className="min-h-screen flex flex-col bg-[#080807]">
         {/* Account Balance - Compact */}
         {wallet.connected && (
-          <div className="w-full bg-[#0F110F] border-b border-[#1a1a1a] px-4 py-2">
+          <div className="w-full bg-[#0F110F] px-4 py-2">
             <AccountBalance />
           </div>
         )}
@@ -1057,8 +1057,33 @@ function Trade() {
 
 // Wrap in Suspense for Next.js static generation
 export default function TradePage() {
+  const TradeSkeleton = () => (
+    <div className="min-h-screen flex flex-col bg-[#080807]">
+      {/* Top compact bar placeholder */}
+      <div className="w-full h-10 bg-[#0F110F] border-b border-[#1a1a1a] animate-pulse" />
+      {/* Main grid placeholder */}
+      <div className="flex-1 p-3">
+        <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-3 h-full">
+          {/* Left column skeleton */}
+          <div className="space-y-3">
+            <div className="h-36 rounded-xl border border-[#1a1a1a] bg-[#0F110F] animate-pulse" />
+            <div className="h-24 rounded-xl border border-[#1a1a1a] bg-[#0F110F] animate-pulse" />
+            <div className="h-24 rounded-xl border border-[#1a1a1a] bg-[#0F110F] animate-pulse" />
+            <div className="h-40 rounded-xl border border-[#1a1a1a] bg-[#0F110F] animate-pulse" />
+            <div className="h-10 rounded-full bg-[#1a1a1a] animate-pulse" />
+          </div>
+          {/* Right column skeleton */}
+          <div className="flex flex-col space-y-3 min-h-0">
+            <div className="h-12 rounded-xl border border-[#1a1a1a] bg-[#0F110F] animate-pulse flex-shrink-0" />
+            <div className="flex-1 min-h-0 rounded-xl border border-[#1a1a1a] bg-[#0F110F] animate-pulse" />
+            <div className="h-[300px] rounded-xl border border-[#1a1a1a] bg-[#0F110F] animate-pulse flex-shrink-0" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#080807] flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+    <Suspense fallback={<TradeSkeleton /> }>
       <Trade />
     </Suspense>
   );
