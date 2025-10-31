@@ -12,6 +12,11 @@ Powered by the **Drift Protocol**, ElaraFi lets traders open two opposite perpet
 
 The platform combines AI analytics from **Elara Agent** and an automated backend worker for TP/SL monitoring.
 
+Elara Docs :- [Elara Docs](https://app.gitbook.com/o/5F7jcFtQchpN0RTF9rWi/s/uQjzoXRxhP2VGzuWwtOe/~/changes/mILDbGBoCza7pEkJEh7O/~/overview)
+
+Devnet Live :- [ElaraFI](https://www.elarafi.xyz/)
+
+Pitch Deck :- [Pitch Deck](https://drive.google.com/file/d/1DpgVBCkFlP858M_5YT9fVybQ0Iw4ETcq/view?usp=sharing)
 
 ---
 
@@ -87,7 +92,7 @@ REDIS_URL=your_redis_instance
 
 ---
 
-Elara Docs :- ![Elara Docs] https://app.gitbook.com/o/5F7jcFtQchpN0RTF9rWi/s/uQjzoXRxhP2VGzuWwtOe/~/changes/mILDbGBoCza7pEkJEh7O/~/overview
+
 
 ---
 
