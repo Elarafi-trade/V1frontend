@@ -90,9 +90,4 @@ REDIS_URL=your_redis_instance
 3. **Worker Service** monitors each position for P&L or liquidation risk.
 4. **Trades** can be closed manually or auto-triggered by thresholds.
 
----
-
-
-
----
 
