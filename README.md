@@ -1,8 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# <img src="https://github.com/Elarafi-trade/V1/blob/main/public/ElaraFiLogo.png" width="48"> ElaraFi
+
+**AI-Powered Pair Trading Protocol on Solana**
+*Built entirely on top of Drift Protocol*
+
+---
+
+## Overview
+
+**ElaraFi** is an **AI-driven market-neutral trading platform** built on **Solana**, enabling users to execute **pair trades (long/short)** in one click.
+Powered by the **Drift Protocol**, ElaraFi lets traders open two opposite perpetual positions atomically — e.g. LONG BTC and SHORT ETH — for **hedged, market-neutral exposure**.
+
+The platform combines AI analytics from **Elara Agent** and an automated backend worker for TP/SL monitoring.
+
+
+---
+
+## Related Repositories
+
+| Component              | Repository                                                                  | Description                              |
+| ---------------------- | --------------------------------------------------------------------------- | ---------------------------------------- |
+| **Elara Agent**        | [pair-agent](https://github.com/Elarafi-trade/pair-agent)                   | AI Engine for pair analysis and pair trade signals     |
+| **Elara ASI UAgent**   | [pair_agentverse](https://github.com/Elarafi-trade/pair_agentverse)         | AI integration via Agentverse + Fetch.AI,For Top Pairs Daily Signals  |
+| **Elara Telegram Bot** | [pair-agent-telegram](https://github.com/Elarafi-trade/pair-agent-telegram) | Telegram Interface for AI signals        |
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1️⃣ Clone & Install
+
+```bash
+git clone https://github.com/Elarafi-trade/elara-fi.git
+cd elara-fi
+npm install
+```
+
+### 2️⃣ Run Dev Server
 
 ```bash
 npm run dev
@@ -10,27 +43,51 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ⚙️ Environment Variables
 
-## Learn More
+Create a `.env.local` file:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_DRIFT_ENV=devnet
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+DATABASE_URL=your_neon_db_url
+REDIS_URL=your_redis_instance
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+✅ **AI-Powered Pair Signals** — from Elara Agent 
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+✅ **One-Click Pair Execution** — built on Drift SDK
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+✅ **TP/SL Auto-Worker** — automated exit and monitoring
+
+✅ **Real-Time P&L Tracking** — via WebSocket feed
+
+✅ **Non-Custodial Wallets** — Phantom, Backpack supported
+
+✅ **Multi-Market Support** — BTC/ETH, BTC/SOL, SOL/BTC (more coming)
+
+---
+
+## How It Works
+
+1. **ELARA Agent** analyzes market data and emits pair signals.
+2. **Users** select a pair and execute long/short trades atomically via Drift.
+3. **Worker Service** monitors each position for P&L or liquidation risk.
+4. **Trades** can be closed manually or auto-triggered by thresholds.
+
+---
+
+Elara Docs :- ![Elara Docs] https://app.gitbook.com/o/5F7jcFtQchpN0RTF9rWi/s/uQjzoXRxhP2VGzuWwtOe/~/changes/mILDbGBoCza7pEkJEh7O/~/overview
+
+---
+
