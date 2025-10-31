@@ -10,7 +10,9 @@ import { usePairTrading } from '@/hooks/usePairTrading';
 import { usePositionWebSocket } from '@/hooks/usePositionWebSocket';
 import { PositionsTable, PositionData } from '@/components/positions/PositionsTable';
 import { TradeHistoryTable, ClosedTrade } from '@/components/positions/TradeHistoryTable';
+import ClosePositionModal from '@/components/modals/ClosePositionModal';
 import { TrendingUp, TrendingDown, X, CheckCircle } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface Position {
   id: string;
@@ -60,6 +62,10 @@ export default function DashboardPage() {
   const [closedPositions, setClosedPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(false);
   const [closingPosition, setClosingPosition] = useState<string | null>(null);
+  
+  // Close position modal state
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [positionToClose, setPositionToClose] = useState<Position | null>(null);
   
   // Real data state
   const [accountBalance, setAccountBalance] = useState<number>(0);
@@ -276,21 +282,44 @@ export default function DashboardPage() {
   // Connect to WebSocket for real-time P&L updates
   usePositionWebSocket(handlePositionUpdate);
 
-  // Handle close position
-  const handleClosePosition = async (position: Position) => {
-    if (!wallet.publicKey) return;
+  // Open close confirmation modal
+  const openCloseModal = (position: Position) => {
+    setPositionToClose(position);
+    setShowCloseModal(true);
+  };
+
+  // Handle close position confirmation
+  const handleConfirmClose = async () => {
+    if (!wallet.publicKey || !positionToClose) return;
     
     try {
-      setClosingPosition(position.id);
-      console.log(`Dashboard: Closing position ${position.id}...`);
+      setClosingPosition(positionToClose.id);
+      console.log(`Dashboard: Closing position ${positionToClose.id}...`);
       
-      const result = await closePairTrade(position.id);
+      const result = await closePairTrade(positionToClose.id);
       
       if (result) {
         console.log(`Dashboard: Position closed successfully. PnL: $${result.realizedPnl.toFixed(2)}`);
         
+        // Show success toast
+        toast.success(
+          `Position closed! P&L: ${result.realizedPnl >= 0 ? '+' : ''}$${result.realizedPnl.toFixed(2)}`,
+          {
+            duration: 5000,
+            style: {
+              background: '#1a1a1a',
+              color: '#fff',
+              border: result.realizedPnl >= 0 ? '1px solid #22c55e' : '1px solid #ef4444',
+            },
+          }
+        );
+        
+        // Close modal
+        setShowCloseModal(false);
+        setPositionToClose(null);
+        
         // Remove from open positions
-        setOpenPositions(prev => prev.filter(p => p.id !== position.id));
+        setOpenPositions(prev => prev.filter(p => p.id !== positionToClose.id));
         
         // Optionally refetch to get updated data
         setTimeout(async () => {
@@ -307,9 +336,23 @@ export default function DashboardPage() {
           }
         }, 2000);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Dashboard: Error closing position:', err);
-      alert('Failed to close position. Please try again.');
+      
+      // Show error toast
+      toast.error(
+        err?.message || 'Failed to close position. Please try again.',
+        {
+          duration: 5000,
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #ef4444',
+          },
+        }
+      );
+      
+      // Keep modal open on error so user can try again
     } finally {
       setClosingPosition(null);
     }
@@ -451,6 +494,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] p-4 md:p-8 mt-15">
+      {/* Toast Container */}
+      <Toaster position="bottom-right" />
+      
       <div className="max-w-7xl mx-auto">
         
         <div className="flex flex-col md:grid grid-cols-2 w-full max-w-6xl mx-auto gap-0 bg-black p-4 rounded-2xl">
@@ -685,11 +731,12 @@ export default function DashboardPage() {
                 }))}
                 onClose={(positionId) => {
                   const position = openPositions.find(p => p.id === positionId);
-                  if (position) handleClosePosition(position);
+                  if (position) openCloseModal(position);
                 }}
                 onCloseAll={async () => {
-                  for (const position of openPositions) {
-                    await handleClosePosition(position);
+                  // Close all positions one by one with confirmation
+                  if (openPositions.length > 0) {
+                    openCloseModal(openPositions[0]);
                   }
                 }}
                 loading={loading}
@@ -726,6 +773,20 @@ export default function DashboardPage() {
         isOpen={isDepositWithdrawOpen}
         onClose={() => setIsDepositWithdrawOpen(false)}
         defaultTab={depositWithdrawTab}
+      />
+
+      {/* Close Position Confirmation Modal */}
+      <ClosePositionModal
+        isOpen={showCloseModal}
+        onClose={() => {
+          if (!closingPosition) {
+            setShowCloseModal(false);
+            setPositionToClose(null);
+          }
+        }}
+        onConfirm={handleConfirmClose}
+        position={positionToClose}
+        loading={closingPosition === positionToClose?.id}
       />
     </div>
   );

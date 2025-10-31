@@ -622,37 +622,81 @@ export const usePairTrading = () => {
 
         console.log(`📊 Entry: ${position.entryRatio.toFixed(6)}, Current: ${currentRatio.toFixed(6)}`);
 
-        // Close positions
-        const txSigs: string[] = [];
+        // Close both positions in ONE transaction
+        console.log('🔴 Creating COMBINED close transaction for both legs...');
+        
+        const transaction = new Transaction();
+        
+        // Add compute budget
+        const computeUnits = 400_000;
+        const computeBudgetIx = ComputeBudgetProgram.setComputeUnitLimit({
+          units: computeUnits,
+        });
+        transaction.add(computeBudgetIx);
 
+        // Add close instructions for both legs
         if (longPos) {
-          console.log(`🔴 Closing LONG...`);
-          const closeLongTx = await driftClient.placePerpOrder({
+          console.log(`   Closing LONG: ${(longPos.baseAssetAmount.abs().toNumber() / 1e9).toFixed(6)} ${position.longMarketSymbol}`);
+          const closeLongIx = await driftClient.getPlacePerpOrderIx({
             orderType: OrderType.MARKET,
             marketIndex: longMarket.marketIndex,
             direction: PositionDirection.SHORT,
             baseAssetAmount: longPos.baseAssetAmount.abs(),
             reduceOnly: true,
           });
-          txSigs.push(closeLongTx);
-          console.log(`✅ Long closed: ${closeLongTx}`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          transaction.add(closeLongIx);
         }
 
         if (shortPos) {
-          console.log(`🔴 Closing SHORT...`);
-          const closeShortTx = await driftClient.placePerpOrder({
+          console.log(`   Closing SHORT: ${(shortPos.baseAssetAmount.abs().toNumber() / 1e9).toFixed(6)} ${position.shortMarketSymbol}`);
+          const closeShortIx = await driftClient.getPlacePerpOrderIx({
             orderType: OrderType.MARKET,
             marketIndex: shortMarket.marketIndex,
             direction: PositionDirection.LONG,
             baseAssetAmount: shortPos.baseAssetAmount.abs(),
             reduceOnly: true,
           });
-          txSigs.push(closeShortTx);
-          console.log(`✅ Short closed: ${closeShortTx}`);
+          transaction.add(closeShortIx);
         }
 
-        const closeTxSig = txSigs.join(',');
+        console.log('✍️  Requesting signature for combined close...');
+
+        // Send combined transaction
+        let closeTxSig: string;
+        try {
+          if (wallet.sendTransaction) {
+            closeTxSig = await wallet.sendTransaction(transaction, connection, {
+              skipPreflight: true,
+              preflightCommitment: 'confirmed',
+              maxRetries: 3,
+            });
+          } else {
+            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+            transaction.recentBlockhash = blockhash;
+            transaction.feePayer = wallet.publicKey;
+            
+            const signedTx = await wallet.signTransaction!(transaction);
+            closeTxSig = await connection.sendRawTransaction(signedTx.serialize(), {
+              skipPreflight: true,
+              maxRetries: 0,
+            });
+            
+            await connection.confirmTransaction({
+              signature: closeTxSig,
+              blockhash,
+              lastValidBlockHeight,
+            }, 'confirmed');
+          }
+        } catch (err: any) {
+          if (err.message?.includes('already been processed')) {
+            throw new Error('Close transaction already submitted. Please wait a moment.');
+          }
+          throw err;
+        }
+
+        console.log(`✅ Combined close transaction sent: ${closeTxSig}`);
+        await connection.confirmTransaction(closeTxSig, 'confirmed');
+        console.log('✅ Both positions closed in single signature!');
 
         // Calculate P&L
         const ratioChange = (currentRatio - position.entryRatio) / position.entryRatio;
