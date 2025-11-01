@@ -825,6 +825,14 @@ function Trade() {
                             </span>
                           </div>
 
+                          {/* Narrative */}
+                          <div className="flex items-center justify-between py-1">
+                            <span className="text-foreground/70">Narrative</span>
+                          </div>
+                          <div className="mt-1 p-2 bg-purple-800/20 rounded-lg text-purple-300 text-[10px] h-16 overflow-y-auto">
+                            {analysis.narrative}
+                          </div>
+
                           {/* Refresh button */}
                           <button
                             type="button"
