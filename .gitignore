@@ -23,3 +23,5 @@ secrets/
 *.swp
 .DS_Store 
 .cursor
+
+package-lock.json
